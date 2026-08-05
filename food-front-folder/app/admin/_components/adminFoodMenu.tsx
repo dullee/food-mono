@@ -132,34 +132,6 @@ export default function AdminFoodMenu() {
               ))}
             </div>
           </div>
-
-          <div className="rounded-3xl border border-gray-200 bg-slate-50 p-5">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
-              Add new dish
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <input
-                type="text"
-                placeholder="Dish name"
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition hover:border-gray-300 focus:border-black"
-              />
-              <input
-                type="text"
-                placeholder="Category"
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition hover:border-gray-300 focus:border-black"
-              />
-              <input
-                type="number"
-                placeholder="Price"
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition hover:border-gray-300 focus:border-black"
-              />
-              <select className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition hover:border-gray-300 focus:border-black">
-                <option>Available</option>
-                <option>Out of stock</option>
-              </select>
-            </div>
-            <Button className="mt-5 w-full px-4 py-3">Save dish</Button>
-          </div>
         </div>
       </div>
     </div>
