@@ -1,0 +1,14 @@
+{
+  "name": "food-mono",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "food-front-folder",
+    "backendTest"
+  ],
+  "scripts": {
+    "dev:front": "npm run dev --workspace=food-front-folder",
+    "dev:back": "npm run dev --workspace=backendtest",
+    "dev": "npx concurrently \"npm run dev:back\" \"npm run dev:front\""
+  }
+}

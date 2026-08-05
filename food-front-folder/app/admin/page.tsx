@@ -11,41 +11,62 @@ export default function Page() {
   const [selectedMenu, setSelectedMenu] = useState<string>("orders");
 
   return (
-    <div className="flex min-h-screen bg-[#F4F4F5] justify-center">
-      <div className="max-w-360 flex w-full relative gap-6">
-        <div className="max-w-51.25 flex bg-white h-full w-full">
-          <div className="fixed left-164 top-0 flex flex-col px-5 pt-9 gap-10">
+    <div className="flex min-h-screen bg-[#F4F4F5] justify-center w-full">
+      <div className="max-w-[1440px] flex w-full gap-6 px-4">
+        <div className="w-[260px] shrink-0 hidden md:block">
+          <div className="fixed top-0 left-auto w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col px-5 pt-9 gap-10">
             <div className="flex max-h-12">
-              <Image alt="logo" width={165} height={44} src={"logoHDark.svg"} />
+              <Image
+                alt="logo"
+                width={165}
+                height={44}
+                src={"/logoHDark.svg"}
+              />
             </div>
-            <div className="flex flex-col gap-6 items-center">
+
+            <div className="flex flex-col gap-3">
               <Button
                 variant={"ghost"}
                 onClick={() => setSelectedMenu("menu")}
-                className={`py-2 px-6 gap-2.5 flex  ${selectedMenu === "menu" && "bg-black text-white"} `}
+                className={`py-2 px-6 gap-2.5 flex justify-start w-full ${
+                  selectedMenu === "menu"
+                    ? "bg-black text-white hover:bg-black/90 hover:text-white"
+                    : ""
+                }`}
               >
-                <LayoutDashboard /> Food menu
+                <LayoutDashboard size={20} />
+                <span>Food menu</span>
               </Button>
+
               <Button
                 variant={"ghost"}
                 onClick={() => setSelectedMenu("orders")}
-                className={`py-2 px-6 gap-2.5 flex  ${selectedMenu === "orders" && "bg-black text-white"} `}
+                className={`py-2 px-6 gap-2.5 flex justify-start w-full ${
+                  selectedMenu === "orders"
+                    ? "bg-black text-white hover:bg-black/90 hover:text-white"
+                    : ""
+                }`}
               >
-                <Truck />
-                <h2 className="w-full">Orders</h2>
+                <Truck size={20} />
+                <span>Orders</span>
               </Button>
-              <div></div>
             </div>
           </div>
         </div>
-        <div className="mt-6 mr-10 w-full flex flex-col gap-6">
-          <div className="ml-auto border border-black w-9 h-9 rounded-full flex justify-center items-center">
-            ?
-          </div>
-          <div>
-            {selectedMenu === "orders" ? <AdminOrderInfo /> : <AdminFoodMenu />}
 
-            <Pagination></Pagination>
+        <div className="py-6 w-full flex flex-col gap-6 min-w-0">
+          <div className="flex justify-end w-full">
+            <div className="border border-black w-9 h-9 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-100">
+              ?
+            </div>
+          </div>
+
+          <div className="flex-1">
+            {selectedMenu === "orders" ? <AdminOrderInfo /> : <AdminFoodMenu />}
+          </div>
+
+          <div className="mt-auto pt-4">
+            <Pagination />
           </div>
         </div>
       </div>
