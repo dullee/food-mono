@@ -3,6 +3,10 @@
 
 # dependencies
 /node_modules
+food-front/node_modules/
+food-back/node_modules/
+food-front/.next/
+food-front/out/
 /.pnp
 .pnp.*
 .yarn/*
