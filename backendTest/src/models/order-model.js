@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
-import { UserModel } from "./user-model";
 
 const ObjectId = mongoose.ObjectId;
 const Schema = mongoose.Schema;
 
 const OrderSchema = new Schema({
   id: ObjectId,
-  user: UserModel,
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   totalPrice: Number,
   foodOrderItems: [{ food: String, quantity: Number }],
   status: {
@@ -18,4 +17,4 @@ const OrderSchema = new Schema({
   updatedAt: { type: Date, require: true, default: Date.now },
 });
 
-export const OrderModel = mongoose.model("order", OrderSchema)
+export const OrderModel = mongoose.model("order", OrderSchema);
