@@ -12,9 +12,9 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-[#F4F4F5] justify-center w-full">
-      <div className="max-w-[1440px] flex w-full gap-6 px-4">
-        <div className="w-[260px] shrink-0 hidden md:block">
-          <div className="fixed top-0 left-auto w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col px-5 pt-9 gap-10">
+      <div className="max-w-360 flex w-full gap-6 px-4">
+        <div className="w-65 shrink-0 hidden md:block">
+          <div className="fixed top-0 left-auto w-65 h-screen bg-white border-r border-gray-100 flex flex-col px-5 pt-9 gap-10">
             <div className="flex max-h-12">
               <Image
                 alt="logo"
