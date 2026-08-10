@@ -21,8 +21,10 @@ const OrderSchema = new Schema({
     enum: ["PENDING", "CANCELED", "DELIVERED"],
     default: "PENDING",
   },
-  createdAt: { type: Date, require: true, default: Date.now },
-  updatedAt: { type: Date, require: true, default: Date.now },
-});
+  {
+    timestamps: true, // 👈 Enables automatic createdAt and updatedAt management
+  }
+}
+);
 
 export const OrderModel = mongoose.model("order", OrderSchema);

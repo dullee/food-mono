@@ -21,7 +21,7 @@ mongoose
     "mongodb+srv://dulguunenkhbayar05_db_user:PMtoxRdJDoIt8rVw@testcluster.vdlomqi.mongodb.net",
   )
   .then(() => console.log("Connected"));
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`server is running on http://localhost:${port}`);
 });
 //aaasd
