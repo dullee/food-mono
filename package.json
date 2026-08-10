@@ -10,5 +10,8 @@
     "dev:front": "npm run dev --workspace=food-front-folder",
     "dev:back": "npm run dev --workspace=backendtest",
     "dev": "npx concurrently \"npm run dev:back\" \"npm run dev:front\""
+  },
+  "dependencies": {
+    "nodemon": "^3.1.14"
   }
 }

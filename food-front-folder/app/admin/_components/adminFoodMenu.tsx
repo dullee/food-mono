@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Plus, Tag, Sparkles, Pencil } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react"; // Added Trash2 icon for deletion
+import { useState, useEffect } from "react";
+import Categories from "./categories";
 
 type FoodMenuItem = {
   id: string;
@@ -13,14 +15,11 @@ type FoodMenuItem = {
   status: "Available" | "Out of stock";
 };
 
-const categories = ["Appetizers", "Salads", "Pasta", "Desserts", "Beverages"];
-
 const sampleMenu: FoodMenuItem[] = [
   {
     id: "F-101",
     name: "Grilled Ribeye Steak",
     ingredients: "Past, mushroom, truffle, butter, cheese",
-
     category: "Main course",
     price: 42,
     status: "Available",
@@ -29,7 +28,6 @@ const sampleMenu: FoodMenuItem[] = [
     id: "F-102",
     name: "Avocado Chicken Salad",
     ingredients: "Past, mushroom, truffle, butter, cheese",
-
     category: "Salads",
     price: 18,
     status: "Available",
@@ -46,7 +44,6 @@ const sampleMenu: FoodMenuItem[] = [
     id: "F-104",
     name: "Spicy Buffalo Wings",
     ingredients: "Past, mushroom, truffle, butter, cheese",
-
     category: "Appetizers",
     price: 16,
     status: "Available",
@@ -66,39 +63,28 @@ export default function AdminFoodMenu() {
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <span
-                  key={category}
-                  className="rounded-full border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700"
-                >
-                  {category}
-                </span>
-              ))}{" "}
-              <Button variant="outline" className="px-3 py-2">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+          <Categories/>
           </div>
         </div>
+
 
         <div className="space-y-6">
           <div className="rounded-3xl border border-gray-200 bg-white p-5">
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>Appetizers(6)</div>
+              <div className="font-semibold text-gray-800">Appetizers (6)</div>
             </div>
 
-            <div className="grid gap-4 grid-cols-4">
-              <div className="group rounded-3xl border border-dashed border-[#EF4444] flex justify-center items-center bg-slate-50 p-4 transition hover:border-black">
-                <div className="mt-4 flex flex-col items-center justify-between">
-                  <Button
-                    variant="outline"
-                    className="px-3 py-2 text-xs bg-[#EF4444] text-white"
-                  >
-                    +
-                  </Button>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+              <div className="group rounded-3xl border border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-[220px]">
+                <Button
+                  variant="outline"
+                  className="px-3 py-2 text-xs bg-red-500 text-white rounded-full mb-2 hover:bg-red-600"
+                >
+                  +
+                </Button>
+                <span className="text-sm text-gray-600 font-medium">
                   Add new Dish to Appetizers
-                </div>
+                </span>
               </div>
 
               {sampleMenu.map((item) => (
@@ -106,28 +92,32 @@ export default function AdminFoodMenu() {
                   key={item.id}
                   className="group rounded-3xl border border-gray-200 bg-slate-50 p-4 transition hover:border-black"
                 >
-                  <div className="max-w-59.75 max-h-32.25 relative">
+                  <div className="relative w-full h-32 mb-3 overflow-hidden rounded-2xl">
                     <Image
                       alt="food"
-                      width={239}
-                      height={129}
-                      src={"/finger-food.jpg"}
+                      fill
+                      className="object-cover"
+                      src="/finger-food.jpg"
                     />
                     <Button
                       variant="outline"
-                      className="text-xs text-[#EF4444] absolute bottom-5 right-5 h-12 w-12 z-30"
+                      className="text-xs text-red-500 absolute bottom-3 right-3 h-9 w-9 p-0 bg-white/90 backdrop-blur-sm z-30 shadow-sm rounded-xl hover:bg-white"
                     >
-                      <Pencil />
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   </div>
 
-                  <div className="mb-4 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-[#EF4444]">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-red-500 truncate max-w-[150px]">
                       {item.name}
-                    </span>{" "}
-                    <span className=" text-gray-900">${item.price}</span>
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">
+                      ${item.price}
+                    </span>
                   </div>
-                  <p className="text-sm">{item.ingredients}</p>
+                  <p className="text-xs text-gray-500 line-clamp-2">
+                    {item.ingredients}
+                  </p>
                 </div>
               ))}
             </div>
