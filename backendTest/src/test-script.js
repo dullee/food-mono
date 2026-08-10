@@ -12,7 +12,10 @@ async function testCategoryRoute() {
       // body: JSON.stringify({
       //   user: "6a74052c0cebb0f4dbc2565c",
       //   totalPrice: 500,
-      //   foodOrderItems: [{ food: "6a73fe2d3d7b9466bb6b8a66", quantity: 2 }],
+      //   foodOrderItems: [
+      //     { food: "6a794548486d6cd6735c70a5", quantity: 2 },
+      //     { food: "6a73fe2d3d7b9466bb6b8a66", quantity: 10 },
+      //   ],
       // }),
     });
 
