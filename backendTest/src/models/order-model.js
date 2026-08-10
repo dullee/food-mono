@@ -3,11 +3,19 @@ import mongoose from "mongoose";
 const ObjectId = mongoose.ObjectId;
 const Schema = mongoose.Schema;
 
+const foodOrderItems = new Schema({
+  food: {
+    type: Schema.Types.ObjectId,
+    ref: "food",
+  },
+  quantity: Number,
+});
+
 const OrderSchema = new Schema({
   id: ObjectId,
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  user: { type: Schema.Types.ObjectId, ref: "user", required: true },
   totalPrice: Number,
-  foodOrderItems: [{ food: String, quantity: Number }],
+  foodOrderItems: [foodOrderItems],
   status: {
     type: String,
     enum: ["PENDING", "CANCELED", "DELIVERED"],

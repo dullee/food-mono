@@ -10,10 +10,10 @@ const UserSchema = new Schema({
   phoneNumber: String,
   address: String,
   role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
-  orderedFoods: String,
+  orderedFoods: { type: Schema.Types.ObjectId, ref: "order" },
   ttl: Date,
   isVerified: Boolean,
   createdAt: { type: Date, require: true, default: Date.now },
   updatedAt: { type: Date, require: true, default: Date.now },
 });
-export const UserModel = mongoose.model("user", UserSchema)
+export const UserModel = mongoose.model("user", UserSchema);

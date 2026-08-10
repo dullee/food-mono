@@ -11,36 +11,22 @@ export default function AddCategory() {
   const [categoryName, setCategoryName] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!categoryName.trim()) return;
-
-    const form = e.target;
-    console.log(form);
-
-
-    setIsSaving(true);
-
-    handleCreateCategory("name");
-    console.log("Saving item:", categoryName);
-
-    setTimeout(() => {
-      setIsSaving(false);
-      setCategoryName("");
-      setIsOpen(false); // Close the menu on complete success
-    }, 800);
-  };
-
   const handleCreateCategory = async (name: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/category/`, {
+      const response = await fetch(`http://localhost:8000/category`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          categoryName: name,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to delete category");
+        throw new Error(data.message || "Failed to create category");
       }
 
       alert("Category added successfully");
@@ -48,7 +34,23 @@ export default function AddCategory() {
       alert(`Error: ${err.message}`);
     }
   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return;
 
+    setIsSaving(true);
+    try {
+      await handleCreateCategory(categoryName);
+      alert("Category added successfully");
+
+      setCategoryName("");
+      setIsOpen(false);
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+        setIsSaving(false)
+    }
+  };
   return (
     <div className="p-4">
       <Button
