@@ -35,9 +35,13 @@ export default function Categories() {
     fetchCategories();
   }, []);
 
+  const handleAddCategory = (newCategory: Category) => {
+    setCategories((prev) => [...prev, newCategory]);
+  };
+
   const handleDeleteCategory = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the category "${name}"?`))
-      return;
+    // if (!confirm(`Are you sure you want to delete the category "${name}"?`))
+    //   return;
 
     try {
       const response = await fetch(`http://localhost:8000/category/${id}`, {
@@ -51,13 +55,10 @@ export default function Categories() {
       }
 
       setCategories((prev) => prev.filter((cat) => cat._id !== id));
-      alert("Category deleted successfully");
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     }
   };
-
-
 
   // 2. Fixed layout structure: Wrapped everything in a single React Fragment (<> ... </>)
   return (
@@ -71,7 +72,7 @@ export default function Categories() {
       {!isLoading && !error && (
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <span
+            <div
               key={category._id}
               className="group/badge inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white pl-3 pr-2 py-1 text-sm text-gray-700 transition hover:bg-slate-100"
             >
@@ -85,10 +86,9 @@ export default function Categories() {
               >
                 <Trash2 className="h-3 w-3" />
               </button>
-            </span>
+            </div>
           ))}
-          <AddCategory/>
-
+          <AddCategory onCategoryAdded={handleAddCategory} />
         </div>
       )}
     </>

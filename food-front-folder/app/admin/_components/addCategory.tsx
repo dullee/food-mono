@@ -5,7 +5,11 @@ import { Plus, X, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function AddCategory() {
+interface AddCategoryProps {
+  onCategoryAdded: (newCategory: Category) => void;
+}
+
+export default function AddCategory({ onCategoryAdded }: AddCategoryProps) {
   // 1. Control the toggle visibility state
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [categoryName, setCategoryName] = useState<string>("");
@@ -29,7 +33,7 @@ export default function AddCategory() {
         throw new Error(data.message || "Failed to create category");
       }
 
-      alert("Category added successfully");
+      return data.category;
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     }
@@ -40,15 +44,15 @@ export default function AddCategory() {
 
     setIsSaving(true);
     try {
-      await handleCreateCategory(categoryName);
-      alert("Category added successfully");
+      const newCategory = await handleCreateCategory(categoryName);
 
+      onCategoryAdded(newCategory);
       setCategoryName("");
       setIsOpen(false);
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     } finally {
-        setIsSaving(false)
+      setIsSaving(false);
     }
   };
   return (
