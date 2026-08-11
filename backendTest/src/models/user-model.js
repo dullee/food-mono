@@ -5,14 +5,14 @@ const ObjectId = Schema.ObjectId;
 
 const UserSchema = new Schema(
   {
-    email: String,
-    password: String,
+    email: { type: string, required: true },
+    password: { type: string, required: true },
     phoneNumber: String,
     address: String,
     role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
     orderedFoods: { type: Schema.Types.ObjectId, ref: "order" },
     ttl: Date,
-    isVerified: Boolean,
+    isVerified: { type: Boolean, default: false },
   },
   {
     timestamps: true, // 👈 Enables automatic createdAt and updatedAt management

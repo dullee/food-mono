@@ -7,6 +7,12 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 
+interface UserProps {
+  _id: string;
+  email: string;
+  password: string;
+}
+
 export default function MultiStepSignup() {
   // Track current step (1 = Email Check, 2 = Password/Details, 3 = Complete)
   const [step, setStep] = useState<number>(1);
@@ -28,12 +34,17 @@ export default function MultiStepSignup() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              // 1. Check with backend if email is free
-              await axios.post("http://localhost:4000/api/users/check-email", {
-                email: values.email,
-              });
+              const usersResponse = await axios.get<UserProps[]>(
+                "http://localhost:8000/user",
+              );
+              const emailTaken = usersResponse.data.some(
+                (user: UserProps) => user.email === values.email,
+              );
 
-              // 2. Email is available! Store it and advance to Step 2
+              if (emailTaken) {
+                setFieldError("email", "Email already registered.");
+                return;
+              }
               setUserEmail(values.email);
               setStep(2);
             } catch (error: any) {
@@ -95,9 +106,10 @@ export default function MultiStepSignup() {
           })}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              await axios.post("http://localhost:4000/api/users", {
+              await axios.post("http://localhost:8000/user", {
                 email: userEmail,
                 password: values.password,
+                
               });
               setStep(3);
             } catch (error) {
