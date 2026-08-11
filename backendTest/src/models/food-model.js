@@ -8,7 +8,7 @@ const FoodSchema = new Schema(
     price: { type: Number, required: true },
     image: String,
     ingredients: String,
-    category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
+    category: { type: Schema.Types.ObjectId, ref: "category", required: true },
   },
   {
     timestamps: true, // 👈 Enables automatic createdAt and updatedAt management

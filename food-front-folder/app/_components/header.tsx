@@ -7,8 +7,8 @@ import logoImg from "@/public/logoH.svg";
 
 export default function Header() {
   return (
-    <div className="flex w-full justify-between md:px-22 md:h-17 bg-[#18181B]">
-      <Image src={logoImg} alt="logo" />
+    <div className="flex w-full justify-between px-22 h-17 bg-[#18181B]">
+      <Image src={logoImg} alt="logo" width={146}  height={44}/>
       <div className="flex gap-3 items-center">
         <Link href={"/sign_up"}>
           <Button className={"bg-white text-black"}>Sign up</Button>

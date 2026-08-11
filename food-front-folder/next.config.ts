@@ -12,7 +12,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "plus.unsplash.com", // Allows any image from this host
+        hostname: "images.unsplash.com", // Allows any image from this host
       },
     ],
   },
