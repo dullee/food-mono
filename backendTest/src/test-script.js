@@ -4,8 +4,8 @@ async function testCategoryRoute() {
   try {
     console.log("--- Sending Request ---");
 
-    const response = await fetch("http://localhost:8000/order", {
-      method: "GET",
+    const response = await fetch("http://localhost:8000/user/6a7a806dbceb63584750ecfa", {
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
@@ -36,3 +36,4 @@ async function testCategoryRoute() {
 }
 
 testCategoryRoute();
+
