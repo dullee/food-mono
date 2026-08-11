@@ -14,7 +14,7 @@ export interface FoodItem {
   price: number;
   image?: string;
   ingredients?: string;
-  category: { categoryName: string| null };
+  category: { categoryName: string | null };
   createdAt: string;
   updatedAt: string;
 }
@@ -51,7 +51,6 @@ export default function FoodCard({ id }: FoodCardProps) {
 
         const data = await res.json();
         setFoodItem(data[id]);
-        console.log(data[id]);
       } catch (error) {}
     };
     fetchFoods();
@@ -135,7 +134,6 @@ export default function FoodCard({ id }: FoodCardProps) {
                 fill
                 alt={foodItem?.foodName || "finger food"}
                 src={foodItem?.image || "/finger-foodItem.jpg"}
-                
                 objectFit="cover"
               />
             </div>
