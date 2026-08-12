@@ -18,27 +18,17 @@ export interface FoodItem {
   createdAt: string;
   updatedAt: string;
 }
-// export const allFoodObj: Record<number, FoodItem> = {
-//   0: {
-//     foodName: "Steak",
-//     price: 50,
-//     ingredients: "Beef steak, salt, black pepper, butter, garlic and rosemary",
-//     image:
-//       "https://plus.unsplash.com/premium_photo-1723478557023-1f739ec06671?q=80&w=2272&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//     category: { categoryName: "meat" },
-//   },
-// };
 
 interface FoodCardProps {
   id: number;
 }
+
 export default function FoodCard({ id }: FoodCardProps) {
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
   const [showFoodDetail, setshowFoodDetail] = useState<boolean>(false);
   const [showAddedAlert, setShowAddedAlert] = useState<boolean>(false);
   const [orderAmount, setOrderAmount] = useState<number>(1);
   const [foodItem, setFoodItem] = useState<FoodItem | null>(null);
-  // const food = allFoodObj[id];
 
   const duration: number = 1000;
 
@@ -64,18 +54,17 @@ export default function FoodCard({ id }: FoodCardProps) {
     }, duration);
   }
 
-  async function addToCart(food_id: number) {
+  async function addToCart() {
     try {
-      const selectedFood = allFoodObj[food_id];
 
-      if (!selectedFood) {
-        console.error(`Food item with ID ${food_id} not found locally.`);
+      if (!foodItem) {
+        console.error(`Food item with ID ${id} not found locally.`);
         return;
       }
 
-      // 2. Use the spread operator (...) to send fields directly matching the Mongoose schema
-      await axios.post("http://localhost:8000/food", {
-        ...selectedFood,
+      await axios.post("http://localhost:8000/order", {
+        
+        ...foodItem,
       });
       triggerAlert();
       setAddedToCart(true);

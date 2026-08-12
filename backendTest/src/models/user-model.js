@@ -15,7 +15,7 @@ const UserSchema = new Schema(
     isVerified: { type: Boolean, default: false },
   },
   {
-    timestamps: true, // 👈 Enables automatic createdAt and updatedAt management
+    timestamps: true, 
   },
 );
 export const UserModel = mongoose.model("user", UserSchema);
