@@ -63,7 +63,7 @@ export default function FoodCard({ id }: FoodCardProps) {
       }
 
       await axios.post("http://localhost:8000/order", {
-        
+
         ...foodItem,
       });
       triggerAlert();
@@ -88,7 +88,7 @@ export default function FoodCard({ id }: FoodCardProps) {
             onClick={() => setshowFoodDetail(true)}
           />
           <Button
-            onClick={() => addToCart(id)}
+            onClick={() => addToCart()}
             className={`absolute ${addedToCart ? "bg-black " : "bg-white"} bottom-5 right-5  cursor-pointer rounded-full w-11 h-11 text-[#EF4444]`}
           >
             {addedToCart ? <Check size={16} /> : <Plus size={16} />}
