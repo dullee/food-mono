@@ -15,33 +15,38 @@ type FoodMenuItem = {
   status: "Available" | "Out of stock";
 };
 
+type Category = {
+  categoryName: String;
+  _id: String;
+};
+
 export default function AdminFoodMenu() {
-  const [categories, setCategories] = useState<any[] | null>([]);
+  const [categories, setCategories] = useState<Category[] | null>([]);
   const [foods, setFoods] = useState<any[] | null>([]);
   const [isLoading, setIsLoading] = useState<Boolean>(true);
   const [isLoadingFoods, setIsLoadingFoods] = useState<Boolean>(true);
 
+  const fetchCategories = async () => {
+    const res = await fetch("http://localhost:8000/category");
+
+    const data = await res.json();
+    setCategories(data);
+    setIsLoading(false);
+  };
+
+  const fetchFoods = async () => {
+    const res = await fetch("http://localhost:8000/food");
+    const data = await res.json();
+    setFoods(data);
+    setIsLoadingFoods(false);
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await fetch("http://localhost:8000/category");
-
-      const data = await res.json();
-      setCategories(data);
-      setIsLoading(false);
-    };
-
-    const fetchFoods = async () => {
-      const res = await fetch("http://localhost:8000/food");
-      const data = await res.json();
-      setFoods(data);
-      setIsLoadingFoods(false);
-    };
-
     fetchCategories();
     fetchFoods();
   }, []);
 
-  function filterFood(categoryId: string) {
+  function filterFood(categoryId: String) {
     return foods?.filter((food) => food.category?._id === categoryId);
   }
 
@@ -57,15 +62,15 @@ export default function AdminFoodMenu() {
                 </p>
               </div>
             </div>
-            <Categories />
+            <Categories onCategoryAdded={fetchCategories}/>
           </div>
         </div>
 
         <div className="space-y-6">
           {!isLoading && (
             <div className="rounded-3xl border border-gray-200 bg-white p-5">
-              {categories?.map((category) => (
-                <div key={category._id}>
+              {categories?.map((category, index) => (
+                <div key={index}>
                   <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="font-semibold text-gray-800">
                       {category.categoryName}
@@ -73,12 +78,12 @@ export default function AdminFoodMenu() {
                   </div>
 
                   <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                    <div className="group rounded-3xl border border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-55">
+                    <div className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-55">
                       <Button
                         variant="outline"
-                        className="px-3 py-2 text-xs bg-red-500 text-white rounded-full mb-2 hover:bg-red-600"
+                        className="w-10 h-10 bg-red-500 text-white rounded-full hover:bg-red-600"
                       >
-                        +
+                        <Plus/>
                       </Button>
                       <span className="text-sm text-gray-600 font-medium">
                         Add new Dish to {category.categoryName}
@@ -96,7 +101,7 @@ export default function AdminFoodMenu() {
                               alt="food"
                               fill
                               className="object-cover"
-                              src="/finger-food.jpg"
+                              src={food.image || `/finger-food.jpg`}
                             />
                             <Button
                               variant="outline"
