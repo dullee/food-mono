@@ -5,24 +5,32 @@ import { Plus, X, FolderPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-interface Category {
+type Category = {
   _id: string;
   categoryName: string;
   createdAt?: string;
   updatedAt?: string;
-}
+};
+
+type Food = {
+  _id: string;
+  foodName: string;
+  category: Category;
+};
 
 export default function Categories({
   onCategoryAdded,
 }: {
   onCategoryAdded: () => void;
-}) {
+}{selectedCategory}:{}) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [categoryName, setCategoryName] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -38,15 +46,31 @@ export default function Categories({
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const handleAddCategory = (newCategory: Category) => {
-    setCategories((prev) => [...prev, newCategory]);
+  const fetchFoods = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/food");
+      if (!res.ok) throw new Error("Failed to fetch foods");
+      const data = await res.json();
+      setFoods(data);
+    } catch (err) {
+      console.error("Database connection error via backend:", err);
+      setError("Express server is offline.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteCategory = async (id: string, name: string) => {
+  useEffect(() => {
+    fetchCategories();
+    fetchFoods();
+  }, []);
+
+  const getFoodLength = (categoryId: string) => {
+    fetchFoods();
+    return foods?.filter((food) => food.category._id === categoryId).length;
+  };
+
+  const handleDeleteCategory = async (id: string) => {
     try {
       const response = await fetch(`http://localhost:8000/category/${id}`, {
         method: "DELETE",
@@ -95,7 +119,6 @@ export default function Categories({
     setIsSaving(true);
     try {
       const newCategory = await handleCreateCategory(categoryName);
-
       fetchCategories();
       onCategoryAdded();
       setCategoryName("");
@@ -117,26 +140,37 @@ export default function Categories({
 
       {!isLoading && !error && (
         <div className="flex flex-wrap items-start gap-2">
-          <Button variant={"outline"}>
+          <Button
+            variant={"outline"}
+            className={!selectedCategory ? "border-red-500" : ""}
+            onClick={() => setSelectedCategory(null)}
+          >
             All dishes{" "}
-            <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">10</span>
+            <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
+              {foods.length}
+            </span>
           </Button>
           {categories.map((category) => (
-            <div
+            <Button
+              className={
+                selectedCategory === category._id ? "border-red-500" : ""
+              }
               key={category._id}
-              className="group/badge inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white pl-3 pr-2 py-1 text-sm text-gray-700 transition hover:bg-slate-100"
+              variant={"outline"}
+              onClick={() => setSelectedCategory(category._id)}
             >
               {category.categoryName}
-              <button
-                onClick={() =>
-                  handleDeleteCategory(category._id, category.categoryName)
-                }
+              <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
+                {getFoodLength(category._id)}
+              </span>
+              {/* <button
+                onClick={() => handleDeleteCategory(category._id)}
                 className="rounded-full p-0.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                 title="Delete Category"
               >
                 <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
+              </button> */}
+            </Button>
           ))}
           <div className="">
             <Button

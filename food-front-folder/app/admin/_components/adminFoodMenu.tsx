@@ -6,13 +6,13 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Categories from "./categories";
 
-type FoodMenuItem = {
-  id: string;
-  name: string;
+type Food = {
+  _id: string;
+  foodName: string;
   ingredients: string;
-  category: string;
+  category: Category;
   price: number;
-  status: "Available" | "Out of stock";
+  image: string;
 };
 
 type Category = {
@@ -21,10 +21,12 @@ type Category = {
 };
 
 export default function AdminFoodMenu() {
-  const [categories, setCategories] = useState<Category[] | null>([]);
-  const [foods, setFoods] = useState<any[] | null>([]);
-  const [isLoading, setIsLoading] = useState<Boolean>(true);
-  const [isLoadingFoods, setIsLoadingFoods] = useState<Boolean>(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingFoods, setIsLoadingFoods] = useState<boolean>(true);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [filteredMenuItems, setFilteredMenuItems] = useState<Food[]>([]);
 
   const fetchCategories = async () => {
     const res = await fetch("http://localhost:8000/category");
@@ -38,6 +40,7 @@ export default function AdminFoodMenu() {
     const res = await fetch("http://localhost:8000/food");
     const data = await res.json();
     setFoods(data);
+    if (filterCategory === null) setFilteredMenuItems(data);
     setIsLoadingFoods(false);
   };
 
@@ -46,9 +49,16 @@ export default function AdminFoodMenu() {
     fetchFoods();
   }, []);
 
-  function filterFood(categoryId: String) {
+  const filterFood = (categoryId: String) => {
     return foods?.filter((food) => food.category?._id === categoryId);
-  }
+  };
+
+  const filterFoodMenu = (categoryId: string) => {
+    setFilterCategory(categoryId);
+    const filteredMenu = filterFood(categoryId);
+
+    setFilteredMenuItems(filteredMenu);
+  };
 
   return (
     <div className="rounded-[2rem] border border-gray-200 bg-white p-6 shadow-sm">
@@ -62,7 +72,10 @@ export default function AdminFoodMenu() {
                 </p>
               </div>
             </div>
-            <Categories onCategoryAdded={fetchCategories}/>
+            <Categories
+              onCategoryAdded={fetchCategories}
+              selectedCategory={filterFoodMenu}
+            />
           </div>
         </div>
 
@@ -83,7 +96,7 @@ export default function AdminFoodMenu() {
                         variant="outline"
                         className="w-10 h-10 bg-red-500 text-white rounded-full hover:bg-red-600"
                       >
-                        <Plus/>
+                        <Plus />
                       </Button>
                       <span className="text-sm text-gray-600 font-medium">
                         Add new Dish to {category.categoryName}
