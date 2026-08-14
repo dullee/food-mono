@@ -1,7 +1,7 @@
 "use client";
+
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
-
 import { Check, CalendarRange, ChevronDown } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Switch } from "@/components/ui/switch";
@@ -22,19 +22,19 @@ interface FoodOrderItemsProps {
 interface UserProps {
   _id: string;
   email: string;
-  password: string;
-  phoneNumber: string;
-  address: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  password?: string;
+  phoneNumber?: string;
+  address?: string;
+  role?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface OrderProps {
   _id: string;
   user: UserProps;
-  totalPrice: Number;
+  totalPrice: number;
   foodOrderItems: FoodOrderItemsProps[];
   status: string;
   createdAt?: string;
@@ -59,16 +59,19 @@ function SquareToggleButton() {
   );
 }
 
+// Fixed missing closing bracket and added status change handler
 function StateDropdownCell({
+  orderId,
   initialState,
 }: {
+  orderId: string;
   initialState: OrderProps["status"];
 }) {
   const [state, setState] = useState(initialState);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const stateStyles: Record<string, string> = {
-    DELIVERED:
-      "bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
+    DELIVERED: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
     IN_TRANSIT: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200",
     PENDING: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200",
     CANCELED: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200",
@@ -81,19 +84,39 @@ function StateDropdownCell({
     "CANCELED",
   ];
 
+  const handleStatusChange = async (newState: string) => {
+    setState(newState);
+    setIsUpdating(true);
+
+    try {
+      await fetch(`http://localhost:8000/order/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newState }),
+      });
+    } catch (err) {
+      console.error("Failed to update status on server:", err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={`h-7 px-2.5 rounded-full text-xs font-medium border flex items-center gap-1 transition-colors ${stateStyles[state]}`}
+        disabled={isUpdating}
+        className={`h-7 px-2.5 rounded-full text-xs font-medium border flex items-center gap-1 transition-colors ${
+          stateStyles[state] || "bg-gray-100 text-gray-800"
+        }`}
       >
-        {state}
+        {isUpdating ? "Updating..." : state}
         <ChevronDown className="h-3 w-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {options.map((opt) => (
           <DropdownMenuItem
             key={opt}
-            onClick={() => setState(opt)}
+            onClick={() => handleStatusChange(opt)}
             className="text-xs font-medium cursor-pointer"
           >
             {opt}
@@ -102,54 +125,8 @@ function StateDropdownCell({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
-const sampleOrders: OrderProps[] = [
-  {
-    _id: "6a79719559e4958a07ceb266",
-    user: {
-      _id: "6a74052c0cebb0f4dbc2565c",
-      email: "funny@gmail.com",
-      password: "123456",
-      phoneNumber: "90484372",
-      address: "ulaanbaatar",
-      role: "USER",
-      isVerified: false,
-      createdAt: "2026-08-06T03:53:16.330Z",
-      updatedAt: "2026-08-08T09:16:37.049Z",
-    },
-    totalPrice: 500,
-    foodOrderItems: [
-      {
-        food: { _id: "1" },
-        quantity: 2,
-      },
-    ],
-    status: "PENDING",
-    createdAt: "2026-08-10T06:37:09.511Z",
-    updatedAt: "2026-08-10T06:37:09.511Z",
-  },
-  // {
-  //   _id: "ORD-102",
-  //   customerEmail: "sarah.connor@cyberdyne.com",
-  //   foodItems: [
-  //     { name: "Pepperoni Pizza (Large)", quantity: 1 },
-  //     { name: "Garlic Breadsticks", quantity: 1 },
-  //   ],
-  //   date: "2026-08-04",
-  //   total: 28.0,
-  //   deliveryAddress: "100 Ocean Drive, Suite 4B",
-  //   deliveryState: "Delivered",
-  // },
-  // {
-  //   _id: "ORD-103",
-  //   customerEmail: "m.scott@dundermifflin.com",
-  //   foodItems: [{ name: "Chicken Alfredo Pasta", quantity: 1 }],
-  //   date: "2026-08-03",
-  //   total: 18.75,
-  //   deliveryAddress: "1725 Slough Avenue, Scranton",
-  //   deliveryState: "Pending",
-  // },
-];
+} // 👈 Added missing closing bracket here!
+
 // 2. Define the columns layout
 export const columns: ColumnDef<OrderProps>[] = [
   // Square Toggle Button
@@ -172,7 +149,7 @@ export const columns: ColumnDef<OrderProps>[] = [
     header: "Customer",
     cell: ({ row }) => (
       <span className="font-medium text-gray-900">
-        {row.original.user?.email || "N/A"}
+        {row.original.user?.email || "Guest"}
       </span>
     ),
   },
@@ -181,16 +158,16 @@ export const columns: ColumnDef<OrderProps>[] = [
     id: "foodOrderItems",
     header: "Food",
     cell: ({ row }) => {
-      const foodItems = row.original.foodOrderItems;
+      const foodItems = row.original.foodOrderItems || [];
 
       const totalCount = foodItems.reduce(
-        (acc, item) => acc + item.quantity,
-        0,
+        (acc, item) => acc + (item.quantity || 0),
+        0
       );
 
       return (
         <DropdownMenu>
-          <DropdownMenuTrigger className="h-8 px-3 rounded-md hover:bg-gray-100 text-xs font-medium flex items-center gap-1.5 transition-colors ">
+          <DropdownMenuTrigger className="h-8 px-3 rounded-md hover:bg-gray-100 text-xs font-medium flex items-center gap-1.5 transition-colors">
             <span>{totalCount} foods</span>
             <ChevronDown className="h-3.5 w-3.5 text-gray-500" />
           </DropdownMenuTrigger>
@@ -200,7 +177,7 @@ export const columns: ColumnDef<OrderProps>[] = [
                 key={idx}
                 className="flex justify-between text-xs"
               >
-                <span>{item["food"].foodName}</span>
+                <span>{item.food?.foodName || "Item"}</span>
                 <span className="font-semibold text-gray-500">
                   x{item.quantity}
                 </span>
@@ -215,15 +192,23 @@ export const columns: ColumnDef<OrderProps>[] = [
   {
     accessorKey: "createdAt",
     header: "Date",
+    cell: ({ row }) => {
+      const dateStr = row.original.createdAt;
+      if (!dateStr) return <span className="text-gray-400">N/A</span>;
+      return (
+        <span className="text-xs text-gray-600">
+          {new Date(dateStr).toLocaleDateString()}
+        </span>
+      );
+    },
   },
   // Total Price
   {
     accessorKey: "totalPrice",
     header: "Total",
     cell: ({ row }) => {
-      const amount = row.original.totalPrice;
-
-      return <span className="font-medium">${String(amount)}</span>;
+      const amount = row.original.totalPrice || 0;
+      return <span className="font-medium">${amount.toFixed(2)}</span>;
     },
   },
   // Delivery Address
@@ -232,7 +217,7 @@ export const columns: ColumnDef<OrderProps>[] = [
     header: "Delivery Address",
     cell: ({ row }) => (
       <span className="text-gray-600 max-w-[220px] truncate block">
-        {row.original.user.address}
+        {row.original.user?.address || "No address provided"}
       </span>
     ),
   },
@@ -240,7 +225,12 @@ export const columns: ColumnDef<OrderProps>[] = [
   {
     accessorKey: "status",
     header: "Delivery State",
-    cell: ({ row }) => <StateDropdownCell initialState={row.original.status} />,
+    cell: ({ row }) => (
+      <StateDropdownCell
+        orderId={row.original._id}
+        initialState={row.original.status}
+      />
+    ),
   },
 ];
 
@@ -268,25 +258,25 @@ export default function AdminOrderInfo() {
 
   return (
     <div>
-      <div className="p-4 flex justify-between">
+      <div className="p-4 flex justify-between items-center">
         <div className="flex flex-col">
-          <h1>Orders</h1>
-          <h3>32 items</h3>
+          <h1 className="text-xl font-bold">Orders</h1>
+          <h3 className="text-sm text-gray-500">{orders.length} items</h3>
         </div>
         <div className="flex gap-3">
           <Button variant={"outline"} className={"px-4 py-2"}>
-            <CalendarRange /> 13 June 2023 - 14 July 2023
+            <CalendarRange className="mr-2 h-4 w-4" /> 13 June 2023 - 14 July 2023
           </Button>
           <Button>Change delivery state</Button>
         </div>
       </div>
       <div className="flex flex-col">
         {isLoading && (
-          <p className="text-sm justify-center flex text-gray-400">
-            Loading categories...
+          <p className="text-sm justify-center flex text-gray-400 py-8">
+            Loading orders...
           </p>
         )}
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-red-500 py-4 px-4">{error}</p>}
         {!isLoading && !error && <DataTable columns={columns} data={orders} />}
       </div>
     </div>

@@ -17,12 +17,14 @@ type Food = {
   foodName: string;
   category: Category;
 };
-
+interface CategoriesProps {
+  onCategoryAdded: () => void;
+  onSelectedCategory: (value: string) => void;
+}
 export default function Categories({
   onCategoryAdded,
-}: {
-  onCategoryAdded: () => void;
-}{selectedCategory}:{}) {
+  onSelectedCategory,
+}: CategoriesProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -31,6 +33,8 @@ export default function Categories({
   const [categoryName, setCategoryName] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+
 
   const fetchCategories = async () => {
     try {
@@ -69,6 +73,11 @@ export default function Categories({
     fetchFoods();
     return foods?.filter((food) => food.category._id === categoryId).length;
   };
+
+  const selectCategoryFilter = (categoryId: string)=>{
+    setSelectedCategory(categoryId)
+    onSelectedCategory(categoryId)
+  }
 
   const handleDeleteCategory = async (id: string) => {
     try {
@@ -143,7 +152,7 @@ export default function Categories({
           <Button
             variant={"outline"}
             className={!selectedCategory ? "border-red-500" : ""}
-            onClick={() => setSelectedCategory(null)}
+            onClick={() => selectCategoryFilter ("")}
           >
             All dishes{" "}
             <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
@@ -157,7 +166,7 @@ export default function Categories({
               }
               key={category._id}
               variant={"outline"}
-              onClick={() => setSelectedCategory(category._id)}
+              onClick={() => selectCategoryFilter(category._id)}
             >
               {category.categoryName}
               <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
