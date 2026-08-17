@@ -34,69 +34,62 @@ export default function Categories({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/category");
-      if (!res.ok) throw new Error("Failed to fetch categories");
-      const data = await res.json();
-      setCategories(data);
-    } catch (err) {
-      console.error("Database connection error via backend:", err);
-      setError("Express server is offline.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchFoods = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/food");
-      if (!res.ok) throw new Error("Failed to fetch foods");
-      const data = await res.json();
-      setFoods(data);
-    } catch (err) {
-      console.error("Database connection error via backend:", err);
-      setError("Express server is offline.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchCategories();
-    fetchFoods();
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const [catRes, foodRes] = await Promise.all([
+          fetch("http://localhost:8000/category"),
+          fetch("http://localhost:8000/food"),
+        ]);
+
+        if (!catRes.ok || !foodRes.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const catData = await catRes.json();
+        const foodData = await foodRes.json();
+
+        setCategories(catData);
+        setFoods(foodData);
+      } catch (err) {
+        console.error("Database connection error via backend:", err);
+        setError("Express server is offline.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialData();
   }, []);
 
   const getFoodLength = (categoryId: string) => {
-    fetchFoods();
     return foods?.filter((food) => food.category._id === categoryId).length;
   };
 
-  const selectCategoryFilter = (categoryId: string)=>{
-    setSelectedCategory(categoryId)
-    onSelectedCategory(categoryId)
-  }
-
-  const handleDeleteCategory = async (id: string) => {
-    try {
-      const response = await fetch(`http://localhost:8000/category/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to delete category");
-      }
-
-      setCategories((prev) => prev.filter((cat) => cat._id !== id));
-      onCategoryAdded();
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
-    }
+  const selectCategoryFilter = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    onSelectedCategory(categoryId);
   };
+// ----------------------------------Test----------------------------------
+  // const handleDeleteCategory = async (id: string) => {
+  //   try {
+  //     const response = await fetch(`http://localhost:8000/category/${id}`, {
+  //       method: "DELETE",
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || "Failed to delete category");
+  //     }
+
+  //     setCategories((prev) => prev.filter((cat) => cat._id !== id));
+  //     onCategoryAdded();
+  //   } catch (err: any) {
+  //     alert(`Error: ${err.message}`);
+  //   }
+  // };
 
   const handleCreateCategory = async (name: string) => {
     try {
@@ -121,6 +114,7 @@ export default function Categories({
       alert(`Error: ${err.message}`);
     }
   };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryName.trim()) return;
@@ -128,7 +122,7 @@ export default function Categories({
     setIsSaving(true);
     try {
       const newCategory = await handleCreateCategory(categoryName);
-      fetchCategories();
+
       onCategoryAdded();
       setCategoryName("");
       setIsOpen(false);
@@ -152,7 +146,7 @@ export default function Categories({
           <Button
             variant={"outline"}
             className={!selectedCategory ? "border-red-500" : ""}
-            onClick={() => selectCategoryFilter ("")}
+            onClick={() => selectCategoryFilter("")}
           >
             All dishes{" "}
             <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">

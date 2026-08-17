@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Categories from "./categories";
+import { CldImage } from "next-cloudinary";
 
-// 1. Correct TypeScript primitive types (string instead of String)
 type Category = {
   _id: string;
   categoryName: string;
@@ -26,9 +26,18 @@ export default function AdminFoodMenu() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingFoods, setIsLoadingFoods] = useState<boolean>(true);
-  const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
-  // 2. Safe fetch handlers with try/catch to prevent unhandled fetch crashes
+  // 1. Store the full selected category object for the modal (null = closed)
+  const [selectedAddCategory, setSelectedAddCategory] =
+    useState<Category | null>(null);
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [foodName, setFoodName] = useState<string>("");
+  const [foodPrice, setFoodPrice] = useState<number>(0);
+  const [foodIngredients, setFoodIngredients] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [foodImage, setFoodImage] = useState<string>("");
+
   const fetchCategories = async () => {
     try {
       const res = await fetch("http://localhost:8000/category");
@@ -60,21 +69,78 @@ export default function AdminFoodMenu() {
     fetchFoods();
   }, []);
 
-  // Helper function to filter foods for a category ID
   const getFoodsForCategory = (categoryId: string) => {
     if (!foods) return [];
     return foods.filter((food) => food.category?._id === categoryId);
   };
 
+  const handleFood = async (
+    name: string,
+    categoryId: string,
+    foodPrice: number,
+    foodIngredients: string,
+    foodImage: string,
+  ) => {
+    const response = await fetch(`http://localhost:8000/food`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        foodName: name,
+        category: categoryId,
+        price: foodPrice,
+        ingredients: foodIngredients,
+        image: foodImage,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create food");
+    }
+
+    return data;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!foodName.trim() || !selectedAddCategory) return;
+
+    setIsSaving(true);
+    try {
+      await handleFood(
+        foodName,
+        selectedAddCategory._id,
+        foodPrice,
+        foodIngredients,
+        foodImage,
+      );
+
+      // Refresh food list to show newly added food item
+      await fetchFoods();
+
+      setFoodName("");
+      setSelectedAddCategory(null);
+      setFoodPrice(0);
+      setFoodIngredients("");
+      setFoodImage("");
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSelectCategory = (categoryId: string) => {
     if (!categoryId || categoryId === filterCategory) {
-      setFilterCategory(null); // Toggle off filter if clicked again
+      setFilterCategory(null);
     } else {
       setFilterCategory(categoryId);
     }
   };
 
-  // Filter categories displayed depending on user selection
   const displayedCategories = filterCategory
     ? categories.filter((cat) => cat._id === filterCategory)
     : categories;
@@ -110,8 +176,11 @@ export default function AdminFoodMenu() {
                   </div>
 
                   <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                    {/* Add New Dish Card */}
-                    <div className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-[220px]">
+                    {/* 2. Open modal specifically for THIS category */}
+                    <div
+                      onClick={() => setSelectedAddCategory(category)}
+                      className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-[220px]"
+                    >
                       <Button
                         variant="outline"
                         className="w-10 h-10 bg-red-500 text-white rounded-full hover:bg-red-600 border-none"
@@ -123,7 +192,6 @@ export default function AdminFoodMenu() {
                       </span>
                     </div>
 
-                    {/* Food Items list for this category */}
                     {!isLoadingFoods &&
                       getFoodsForCategory(category._id)?.map((food) => (
                         <div
@@ -132,10 +200,11 @@ export default function AdminFoodMenu() {
                         >
                           <div>
                             <div className="relative w-full h-32 mb-3 overflow-hidden rounded-2xl bg-gray-200">
+                              <CldImage src="cld-sample-5" alt="test" width={500} height={500}/>
                               <Image
                                 alt={food.foodName || "Food image"}
                                 fill
-                                unoptimized={!!food.image?.startsWith("http")} // Prevents next/image hostname errors for local external images
+                                unoptimized={!!food.image?.startsWith("http")}
                                 className="object-cover"
                                 src={food.image || "/finger-food.jpg"}
                               />
@@ -164,6 +233,113 @@ export default function AdminFoodMenu() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* 3. Render Modal conditionally when selectedAddCategory is NOT null */}
+          {selectedAddCategory && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div
+                onClick={() => setSelectedAddCategory(null)}
+                className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm transition-opacity"
+              />
+
+              <div className="relative z-10 w-full max-w-md transform rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl transition-all">
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Add new dish to {selectedAddCategory.categoryName}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedAddCategory(null)}
+                    className="rounded-full p-1.5 text-gray-400 hover:bg-slate-50 hover:text-gray-700 transition"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2 flex gap-6">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                        Food Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Type food name"
+                        value={foodName}
+                        onChange={(e) => setFoodName(e.target.value)}
+                        disabled={isSaving}
+                        className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                        Food price
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter price..."
+                        value={foodPrice}
+                        onChange={(e) => setFoodPrice(Number(e.target.value))}
+                        disabled={isSaving}
+                        className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Ingredients
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="List ingredients"
+                      value={foodIngredients}
+                      onChange={(e) => setFoodIngredients(e.target.value)}
+                      disabled={isSaving}
+                      className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="relative flex-col">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Food Image
+                    </p>
+
+                    <div className="relative h-34.5 border border-dashed rounded-xl items-center justify-cente focus:ring-4 focus:ring-gray-500/5r flex cursor-pointer">
+                      {/* <input
+                        type="file"
+                        value={foodImage}
+                        onChange={(e) => setFoodImage(e.target.value)}
+                        disabled={isSaving}
+                        id="imageUpload"
+                        accept="image/png, image/jpeg"
+                        className="w-full h-full"
+                        required
+                        autoFocus
+                      /> */}
+                      <label htmlFor="imageUpload">test</label>
+                      <div className="absolute top-1/2 left-40"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isSaving || !foodName.trim()}
+                      className="rounded-xl bg-red-500 hover:bg-red-600 px-5 py-2 text-sm font-medium text-white shadow-sm active:scale-95 transition disabled:opacity-50"
+                    >
+                      {isSaving ? "Saving..." : "Add Food"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>
