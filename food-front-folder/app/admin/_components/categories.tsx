@@ -1,9 +1,8 @@
 "use client"; // Required for client-side hooks like useEffect and useState
 
 import { useState, useEffect } from "react";
-import { Plus, X, FolderPlus, Trash2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type Category = {
   _id: string;
@@ -68,10 +67,12 @@ export default function Categories({
   };
 
   const selectCategoryFilter = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    onSelectedCategory(categoryId);
+    if (selectedCategory !== categoryId) {
+      setSelectedCategory(categoryId);
+      onSelectedCategory(categoryId);
+    }
   };
-// ----------------------------------Test----------------------------------
+  // ----------------------------------Test----------------------------------
   // const handleDeleteCategory = async (id: string) => {
   //   try {
   //     const response = await fetch(`http://localhost:8000/category/${id}`, {
@@ -114,7 +115,7 @@ export default function Categories({
       alert(`Error: ${err.message}`);
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryName.trim()) return;
