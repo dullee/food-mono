@@ -4,17 +4,20 @@ async function testCategoryRoute() {
   try {
     console.log("--- Sending Request ---");
 
-    const response = await fetch("http://localhost:8000/user", {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      "http://localhost:8000/user/6a7b118c84eb2ca1fa913fdc",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify({
+        //   // user: "6a74052c0cebb0f4dbc2565c",
+        //   email: "dulgun@gmail.com",
+        //   password: "funny123go",
+        // }),
       },
-      body: JSON.stringify({
-        // user: "6a74052c0cebb0f4dbc2565c",
-        email: "dulgun@gmail.com",
-        password: "funny123go",
-      }),
-    });
+    );
 
     // Get response as text first to avoid JSON parse crashes on HTML errors
     const text = await response.text();
