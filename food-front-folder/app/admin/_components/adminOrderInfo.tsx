@@ -1,10 +1,11 @@
 "use client";
 
-import { Toggle } from "@/components/ui/toggle";
+import { CldImage } from "next-cloudinary";
+
 import { Button } from "@/components/ui/button";
 import { Check, CalendarRange, ChevronDown } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Switch } from "@/components/ui/switch";
+
 import { useEffect, useState } from "react";
 import { DataTable } from "./dataTable";
 import {
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface FoodOrderItemsProps {
-  food: { _id: string; foodName: string };
+  food: { _id: string; foodName: string; image: string };
   quantity: number;
 }
 
@@ -54,7 +55,7 @@ function SquareToggleButton() {
       }`}
       aria-label="Toggle row"
     >
-      {checked && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+      {checked && <Check className="h-3.5 w-3.5 stroke-3" />}
     </button>
   );
 }
@@ -71,18 +72,14 @@ function StateDropdownCell({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const stateStyles: Record<string, string> = {
-    DELIVERED: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
+    DELIVERED:
+      "bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
     IN_TRANSIT: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200",
     PENDING: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200",
     CANCELED: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200",
   };
 
-  const options: OrderProps["status"][] = [
-    "PENDING",
-    "IN_TRANSIT",
-    "DELIVERED",
-    "CANCELED",
-  ];
+  const options: OrderProps["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
 
   const handleStatusChange = async (newState: string) => {
     setState(newState);
@@ -162,7 +159,7 @@ export const columns: ColumnDef<OrderProps>[] = [
 
       const totalCount = foodItems.reduce(
         (acc, item) => acc + (item.quantity || 0),
-        0
+        0,
       );
 
       return (
@@ -175,10 +172,27 @@ export const columns: ColumnDef<OrderProps>[] = [
             {foodItems.map((item, idx) => (
               <DropdownMenuItem
                 key={idx}
-                className="flex justify-between text-xs"
+                className="flex items-center justify-between gap-3 text-xs p-2 cursor-pointer"
               >
-                <span>{item.food?.foodName || "Item"}</span>
-                <span className="font-semibold text-gray-500">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-gray-100">
+                    <CldImage
+                      alt={item.food?.foodName || "Food image"}
+                      fill
+                      className="object-cover"
+                      src={item.food?.image}
+                      sizes="36px"
+                    />
+                  </div>
+
+                  {/* Food Name */}
+                  <span className="truncate font-medium">
+                    {item.food?.foodName || "Item"}
+                  </span>
+                </div>
+
+                {/* Quantity */}
+                <span className="font-semibold text-gray-500 shrink-0">
                   x{item.quantity}
                 </span>
               </DropdownMenuItem>
@@ -216,7 +230,7 @@ export const columns: ColumnDef<OrderProps>[] = [
     accessorKey: "user.address",
     header: "Delivery Address",
     cell: ({ row }) => (
-      <span className="text-gray-600 max-w-[220px] truncate block">
+      <span className="text-gray-600 max-w-55 truncate block">
         {row.original.user?.address || "No address provided"}
       </span>
     ),
@@ -265,7 +279,8 @@ export default function AdminOrderInfo() {
         </div>
         <div className="flex gap-3">
           <Button variant={"outline"} className={"px-4 py-2"}>
-            <CalendarRange className="mr-2 h-4 w-4" /> 13 June 2023 - 14 July 2023
+            <CalendarRange className="mr-2 h-4 w-4" /> 13 June 2023 - 14 July
+            2023
           </Button>
           <Button>Change delivery state</Button>
         </div>
