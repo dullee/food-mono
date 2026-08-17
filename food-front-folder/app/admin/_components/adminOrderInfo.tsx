@@ -72,11 +72,9 @@ function StateDropdownCell({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const stateStyles: Record<string, string> = {
-    DELIVERED:
-      "bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
-    IN_TRANSIT: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200",
-    PENDING: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200",
-    CANCELED: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200",
+    DELIVERED: "  border-green-500 hover:bg-green-200",
+    PENDING: "  border-red-600 hover:bg-red-200",
+    CANCELED: " border-gray-500 hover:bg-red-200",
   };
 
   const options: OrderProps["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
@@ -86,10 +84,10 @@ function StateDropdownCell({
     setIsUpdating(true);
 
     try {
-      await fetch(`http://localhost:8000/order/${orderId}`, {
+      await fetch(`http://localhost:8000/order`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newState }),
+        body: JSON.stringify({ _id: orderId, status: newState }),
       });
     } catch (err) {
       console.error("Failed to update status on server:", err);
