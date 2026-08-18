@@ -7,20 +7,8 @@ import { Button } from "@/components/ui/button";
 import Categories from "./categories";
 import EditFoodOverlay from "./editFoodOverlay";
 import AddFoodOverlay from "./addFoodOverlay";
-
-type Category = {
-  _id: string;
-  categoryName: string;
-};
-
-type Food = {
-  _id: string;
-  foodName: string;
-  ingredients: string;
-  category: Category;
-  price: number;
-  image: string;
-};
+import { Food } from "@/app/types/food";
+import { Category } from "@/app/types/category.js";
 
 export default function AdminFoodMenu() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,7 +46,6 @@ export default function AdminFoodMenu() {
     } catch (err) {
       console.error("Foods fetch error:", err);
     } finally {
-
       setIsLoadingFoods(false);
     }
   };
@@ -113,7 +100,7 @@ export default function AdminFoodMenu() {
                     {/* Add Dish Card Trigger */}
                     <div
                       onClick={() => setSelectedAddCategory(category)}
-                      className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-[220px]"
+                      className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-55"
                     >
                       <Button
                         variant="outline"

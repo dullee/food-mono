@@ -4,20 +4,8 @@ import { useState, useEffect } from "react";
 import { X, Trash } from "lucide-react";
 import { CldImage, CldUploadButton } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
-
-type Category = {
-  _id: string;
-  categoryName: string;
-};
-
-type Food = {
-  _id: string;
-  foodName: string;
-  ingredients: string;
-  category: Category;
-  price: number;
-  image: string;
-};
+import { Food } from "@/app/types/food";
+import { Category } from "@/app/types/category.js";
 
 type EditFoodOverlayProps = {
   food: Food;

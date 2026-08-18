@@ -2,20 +2,8 @@
 
 import FoodCard from "./foodCard";
 import { useState, useEffect } from "react";
-
-type Category = {
-  _id: string;
-  categoryName: string;
-  createdAt?: string;
-  updatedAt?: string;
-  foodCount: number;
-};
-
-type Food = {
-  _id: string;
-  foodName: string;
-  category: Category;
-};
+import { Category } from "../types/category";
+import { Food } from "../types/food";
 
 export default function FoodMenu() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -52,18 +40,22 @@ export default function FoodMenu() {
   return (
     <div className="w-full flex flex-col md:p-22 md:gap-13.5">
       {categories.map((category) => (
-        <div>
+        <div key={category._id}>
           <h1 className="pb-13.5 text-white text-[30px] font-semibold">
             {category.categoryName}
           </h1>
           <div className="grid md:grid-cols-3 md:gap-9">
-            {Array.from({length: category.foodCount}).map((_, index)=>(
-            <FoodCard />
-
-            ))
-
-            }
-
+            {foods
+              .filter((food) => {
+                const foodCatId =
+                  typeof food.category === "object"
+                    ? food.category?._id
+                    : food.category;
+                return foodCatId === category._id;
+              })
+              .map((food) => (
+                <FoodCard key={food._id} food={food} />
+              ))}
           </div>
         </div>
       ))}

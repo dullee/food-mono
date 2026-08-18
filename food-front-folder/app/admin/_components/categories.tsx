@@ -3,20 +3,9 @@
 import { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Category } from "@/app/types/category";
+import { Food } from "@/app/types/food";
 
-type Category = {
-  _id: string;
-  categoryName: string;
-  createdAt?: string;
-  updatedAt?: string;
-  foodCount: number;
-};
-
-type Food = {
-  _id: string;
-  foodName: string;
-  category: Category;
-};
 interface CategoriesProps {
   onCategoryAdded: () => void;
   onSelectedCategory: (value: string) => void;
@@ -26,7 +15,7 @@ export default function Categories({
   onSelectedCategory,
 }: CategoriesProps) {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [totalFoodCount, setTotalFoodCount] = useState<number>(0)
+  const [totalFoodCount, setTotalFoodCount] = useState<number>(0);
   const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +40,7 @@ export default function Categories({
         const catData = await catRes.json();
         const foodData = await foodRes.json();
 
-        setTotalFoodCount(catData.AllFoodCount)
+        setTotalFoodCount(catData.AllFoodCount);
         setCategories(catData.categories);
         setFoods(foodData);
       } catch (err) {

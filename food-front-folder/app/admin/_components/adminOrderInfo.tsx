@@ -14,33 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface FoodOrderItemsProps {
-  food: { _id: string; foodName: string; image: string };
-  quantity: number;
-}
-
-interface UserProps {
-  _id: string;
-  email: string;
-  password?: string;
-  phoneNumber?: string;
-  address?: string;
-  role?: string;
-  isVerified?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface OrderProps {
-  _id: string;
-  user: UserProps;
-  totalPrice: number;
-  foodOrderItems: FoodOrderItemsProps[];
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Order } from "@/app/types/order.js";
 
 function SquareToggleButton() {
   const [checked, setChecked] = useState(false);
@@ -66,7 +40,7 @@ function StateDropdownCell({
   initialState,
 }: {
   orderId: string;
-  initialState: OrderProps["status"];
+  initialState: Order["status"];
 }) {
   const [state, setState] = useState(initialState);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -77,7 +51,7 @@ function StateDropdownCell({
     CANCELED: " border-gray-500 hover:bg-red-200",
   };
 
-  const options: OrderProps["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
+  const options: Order["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
 
   const handleStatusChange = async (newState: string) => {
     setState(newState);
@@ -123,7 +97,7 @@ function StateDropdownCell({
 } // 👈 Added missing closing bracket here!
 
 // 2. Define the columns layout
-export const columns: ColumnDef<OrderProps>[] = [
+export const columns: ColumnDef<Order>[] = [
   // Square Toggle Button
   {
     id: "toggle",
@@ -247,7 +221,7 @@ export const columns: ColumnDef<OrderProps>[] = [
 ];
 
 export default function AdminOrderInfo() {
-  const [orders, setOrders] = useState<OrderProps[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

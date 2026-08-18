@@ -7,15 +7,15 @@ const UserSchema = new Schema(
   {
     email: { type: String, required: true },
     password: { type: String, required: true },
-    phoneNumber: String,
-    address: String,
+    phoneNumber: { type: String, default: null },
+    address: { type: String, default: null },
     role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
-    orderedFoods: { type: Schema.Types.ObjectId, ref: "order" },
+    orderedFoods: { type: Schema.Types.ObjectId, ref: "order", default: null },
     ttl: Date,
     isVerified: { type: Boolean, default: false },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   },
 );
 export const UserModel = mongoose.model("user", UserSchema);

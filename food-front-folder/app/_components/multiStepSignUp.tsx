@@ -6,12 +6,7 @@ import axios from "axios";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-
-interface UserProps {
-  _id: string;
-  email: string;
-  password: string;
-}
+import { User } from "@/app/types/user";
 
 export default function MultiStepSignup() {
   // Track current step (1 = Email Check, 2 = Password/Details, 3 = Complete)
@@ -34,11 +29,11 @@ export default function MultiStepSignup() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              const usersResponse = await axios.get<UserProps[]>(
+              const usersResponse = await axios.get<User[]>(
                 "http://localhost:8000/user",
               );
               const emailTaken = usersResponse.data.some(
-                (user: UserProps) => user.email === values.email,
+                (user: User) => user.email === values.email,
               );
 
               if (emailTaken) {
@@ -109,7 +104,6 @@ export default function MultiStepSignup() {
               await axios.post("http://localhost:8000/user", {
                 email: userEmail,
                 password: values.password,
-                
               });
               setStep(3);
             } catch (error) {

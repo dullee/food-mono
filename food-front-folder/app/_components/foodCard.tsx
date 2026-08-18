@@ -1,34 +1,24 @@
 "use client";
-import Image from "next/image";
-import axios from "axios";
 
+import axios from "axios";
+import { CldImage } from "next-cloudinary";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Food } from "../types/food.js";
 
-export interface FoodItem {
-  _id: string;
-  foodName: string;
-  price: number;
-  image?: string;
-  ingredients?: string;
-  category: { categoryName: string | null };
-  createdAt: string;
-  updatedAt: string;
-}
+type FoodProps = {
+  food: Food;
+};
 
-interface FoodCardProps {
-  id: number;
-}
-
-export default function FoodCard({ id }: FoodCardProps) {
+export default function FoodCard({ food }: FoodProps) {
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
   const [showFoodDetail, setshowFoodDetail] = useState<boolean>(false);
   const [showAddedAlert, setShowAddedAlert] = useState<boolean>(false);
   const [orderAmount, setOrderAmount] = useState<number>(1);
-  const [foodItem, setFoodItem] = useState<FoodItem | null>(null);
+  const [foodItem, setFoodItem] = useState<Food | null>(null);
 
   const duration: number = 1000;
 
@@ -40,7 +30,7 @@ export default function FoodCard({ id }: FoodCardProps) {
         if (!res.ok) throw new Error("Failed to fetch categories");
 
         const data = await res.json();
-        setFoodItem(data[id]);
+        setFoodItem(data[food._id]);
       } catch (error) {}
     };
     fetchFoods();
@@ -56,14 +46,12 @@ export default function FoodCard({ id }: FoodCardProps) {
 
   async function addToCart() {
     try {
-
       if (!foodItem) {
-        console.error(`Food item with ID ${id} not found locally.`);
+        console.error(`Food item with ID ${food._id} not found locally.`);
         return;
       }
 
       await axios.post("http://localhost:8000/order", {
-
         ...foodItem,
       });
       triggerAlert();
@@ -80,9 +68,9 @@ export default function FoodCard({ id }: FoodCardProps) {
     <>
       <Card className="flex p-4 max-w-100 w-full z-10">
         <div className="relative w-full h-50 overflow-hidden rounded-md">
-          <Image
-            alt={foodItem?.foodName || "finger food"}
-            src={foodItem?.image || "/finger-food.jpg"}
+          <CldImage
+            alt={food?.foodName || "finger food"}
+            src={food?.image || "/finger-food.jpg"}
             fill
             className="object-cover"
             onClick={() => setshowFoodDetail(true)}
@@ -100,14 +88,12 @@ export default function FoodCard({ id }: FoodCardProps) {
         >
           <div className="flex justify-between">
             <h1 className="text-[#EF4444] text-[24px] font-semibold">
-              {foodItem?.foodName}
+              {food?.foodName}
             </h1>
-            <span className="text-[18px] font-semibold">
-              ${foodItem?.price}
-            </span>
+            <span className="text-[18px] font-semibold">${food?.price}</span>
           </div>
           <CardDescription className="text-black text-[14px] h-10">
-            {foodItem?.ingredients}
+            {food?.ingredients}
           </CardDescription>
         </div>
       </Card>
@@ -119,11 +105,11 @@ export default function FoodCard({ id }: FoodCardProps) {
             }
           >
             <div className="relative w-full max-w-94.25 h-full max-h-91 rounded-xl overflow-hidden">
-              <Image
+              <CldImage
                 fill
-                alt={foodItem?.foodName || "finger food"}
-                src={foodItem?.image || "/finger-foodItem.jpg"}
-                objectFit="cover"
+                alt={food?.foodName || "finger food"}
+                src={food?.image || "/finger-foodItem.jpg"}
+                className="object-cover"
               />
             </div>
             <div className="flex flex-col w-full h-full justify-between">
@@ -137,16 +123,16 @@ export default function FoodCard({ id }: FoodCardProps) {
                 </Button>
 
                 <h1 className="text-[30px] pb-3 font-semibold text-[#EF4444]">
-                  {foodItem?.foodName}
+                  {food?.foodName}
                 </h1>
-                <p className="text-[16px]">{foodItem?.ingredients}</p>
+                <p className="text-[16px]">{food?.ingredients}</p>
               </div>
               <div className="flex flex-col gap-6">
                 <div className="flex ">
                   <div className="w-full">
                     <p className="text-[16px]">Total Price</p>
                     <h3 className="text-[24px] font-semibold">
-                      ${foodItem?.price}
+                      ${food?.price}
                     </h3>
                   </div>
                   <div className="flex items-center gap-3">

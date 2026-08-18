@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import bikeImg from "@/public/deliveryBike.jpg";
-
 import BackButton from "../_components/backButton";
-
 import MultiStepSignup from "../_components/multiStepSignUp";
 
 export default function SignUp() {
@@ -20,9 +18,11 @@ export default function SignUp() {
           <div className="flex justify-center gap-2">
             <p>Already have an account? </p>
 
-            <span><Link href={"/log_in"} className="text-[#2563EB]">Log in</Link></span>
-
-
+            <span>
+              <Link href={"/log_in"} className="text-[#2563EB]">
+                Log in
+              </Link>
+            </span>
           </div>
         </div>
         <Image

@@ -11,7 +11,7 @@ export default function LogInForm() {
   // Track current step (1 = Email Check, 2 = Password/Details, 3 = Complete)
   const [step, setStep] = useState<number>(1);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+
   const [resetPassword, SetResetPassword] = useState<boolean>(false);
 
   return (
