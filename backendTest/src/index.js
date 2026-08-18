@@ -5,10 +5,12 @@ import { categoryRouter } from "./routes/category.js";
 import { foodRouter } from "./routes/food.js";
 import { userRouter } from "./routes/user.js";
 import { orderRouter } from "./routes/order.js";
+import cookieParser from "cookie-parser";
 
 const port = 8000;
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 app.use("/category", categoryRouter);
