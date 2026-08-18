@@ -6,7 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Food } from "../types/food.js";
 
 type FoodProps = {
@@ -18,23 +18,8 @@ export default function FoodCard({ food }: FoodProps) {
   const [showFoodDetail, setshowFoodDetail] = useState<boolean>(false);
   const [showAddedAlert, setShowAddedAlert] = useState<boolean>(false);
   const [orderAmount, setOrderAmount] = useState<number>(1);
-  const [foodItem, setFoodItem] = useState<Food | null>(null);
 
   const duration: number = 1000;
-
-  useEffect(() => {
-    const fetchFoods = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/food");
-
-        if (!res.ok) throw new Error("Failed to fetch categories");
-
-        const data = await res.json();
-        setFoodItem(data[food._id]);
-      } catch (error) {}
-    };
-    fetchFoods();
-  }, []);
 
   function triggerAlert() {
     setShowAddedAlert(true);
@@ -46,13 +31,8 @@ export default function FoodCard({ food }: FoodProps) {
 
   async function addToCart() {
     try {
-      if (!foodItem) {
-        console.error(`Food item with ID ${food._id} not found locally.`);
-        return;
-      }
-
       await axios.post("http://localhost:8000/order", {
-        ...foodItem,
+        ...food,
       });
       triggerAlert();
       setAddedToCart(true);
