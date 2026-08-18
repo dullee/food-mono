@@ -9,6 +9,7 @@ type Category = {
   categoryName: string;
   createdAt?: string;
   updatedAt?: string;
+  foodCount: number;
 };
 
 type Food = {
@@ -25,6 +26,7 @@ export default function Categories({
   onSelectedCategory,
 }: CategoriesProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [totalFoodCount, setTotalFoodCount] = useState<number>(0)
   const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,8 @@ export default function Categories({
         const catData = await catRes.json();
         const foodData = await foodRes.json();
 
-        setCategories(catData);
+        setTotalFoodCount(catData.AllFoodCount)
+        setCategories(catData.categories);
         setFoods(foodData);
       } catch (err) {
         console.error("Database connection error via backend:", err);
@@ -61,10 +64,6 @@ export default function Categories({
 
     loadInitialData();
   }, []);
-
-  const getFoodLength = (categoryId: string) => {
-    return foods?.filter((food) => food.category._id === categoryId).length;
-  };
 
   const selectCategoryFilter = (categoryId: string) => {
     if (selectedCategory !== categoryId) {
@@ -151,7 +150,7 @@ export default function Categories({
           >
             All dishes{" "}
             <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
-              {foods.length}
+              {totalFoodCount}
             </span>
           </Button>
           {categories.map((category) => (
@@ -165,7 +164,7 @@ export default function Categories({
             >
               {category.categoryName}
               <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-xs">
-                {getFoodLength(category._id)}
+                {category.foodCount}
               </span>
               {/* <button
                 onClick={() => handleDeleteCategory(category._id)}

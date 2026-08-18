@@ -41,7 +41,7 @@ export default function AdminFoodMenu() {
       const res = await fetch("http://localhost:8000/category");
       if (!res.ok) throw new Error("Failed to fetch categories");
       const data = await res.json();
-      setCategories(data);
+      setCategories(data.categories);
     } catch (err) {
       console.error("Categories fetch error:", err);
     } finally {
@@ -58,6 +58,7 @@ export default function AdminFoodMenu() {
     } catch (err) {
       console.error("Foods fetch error:", err);
     } finally {
+
       setIsLoadingFoods(false);
     }
   };

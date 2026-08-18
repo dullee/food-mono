@@ -3,12 +3,19 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Truck } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
-import { useState } from "react";
+
 import AdminOrderInfo from "./_components/adminOrderInfo";
 import AdminFoodMenu from "./_components/adminFoodMenu";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const [selectedMenu, setSelectedMenu] = useState<string>("orders");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "food";
+
+  const handleTabChange = (tabName: string) => {
+    router.push(`/admin?tab=${tabName}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#F4F4F5] justify-center w-full">
@@ -27,9 +34,9 @@ export default function Page() {
             <div className="flex flex-col gap-3">
               <Button
                 variant={"ghost"}
-                onClick={() => setSelectedMenu("menu")}
+                onClick={() => handleTabChange('food')}
                 className={`py-2 px-6 gap-2.5 flex justify-start w-full ${
-                  selectedMenu === "menu"
+                  activeTab === "food"
                     ? "bg-black text-white hover:bg-black/90 hover:text-white"
                     : ""
                 }`}
@@ -40,9 +47,9 @@ export default function Page() {
 
               <Button
                 variant={"ghost"}
-                onClick={() => setSelectedMenu("orders")}
+                onClick={() => handleTabChange("orders")}
                 className={`py-2 px-6 gap-2.5 flex justify-start w-full ${
-                  selectedMenu === "orders"
+                  activeTab === "orders"
                     ? "bg-black text-white hover:bg-black/90 hover:text-white"
                     : ""
                 }`}
@@ -62,7 +69,7 @@ export default function Page() {
           </div>
 
           <div className="flex-1">
-            {selectedMenu === "orders" ? <AdminOrderInfo /> : <AdminFoodMenu />}
+            {activeTab === "orders" ? <AdminOrderInfo /> : <AdminFoodMenu />}
           </div>
 
           <div className="mt-auto pt-4">
