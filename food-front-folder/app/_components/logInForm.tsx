@@ -6,38 +6,48 @@ import axios from "axios";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function LogInForm() {
-  // Track current step (1 = Email Check, 2 = Password/Details, 3 = Complete)
-  const [step, setStep] = useState<number>(1);
+  const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
 
   const [resetPassword, SetResetPassword] = useState<boolean>(false);
 
   return (
     <div className="w-full max-w-md mx-auto ">
-      {step === 1 && !resetPassword && (
+      {!resetPassword && (
         <Formik
-          initialValues={{ email: userEmail }}
+          initialValues={{ email: userEmail, password: "" }}
           validationSchema={Yup.object({
             email: Yup.string()
               .email("Invalid email format")
               .required("Email is required"),
+            password: Yup.string().required("Password is required"),
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              // 1. Check with backend if email is free
-              await axios.post("http://localhost:4000/api/users/check-email", {
-                email: values.email,
-              });
-
-              // 2. Email is available! Store it and advance to Step 2
+              const response = await axios.post(
+                "http://localhost:8000/user/login",
+                {
+                  email: values.email,
+                  password: values.password,
+                },
+                {
+                  withCredentials: true, // Crucial step so the backend JWT cookie gets saved!
+                },
+              );
+              const { role } = response.data.user;
+              if (role === "ADMIN") {
+                router.push("/admin");
+              } else {
+                router.push("/");
+              }
               setUserEmail(values.email);
-              setStep(2);
             } catch (error: any) {
+              // Catch errors matching your backend messaging patterns
               const errorMsg =
-                error.response?.data?.error ||
-                "Email already registered or server error.";
+                error.response?.data?.message || "Invalid email or password.";
               setFieldError("email", errorMsg);
             } finally {
               setSubmitting(false);
@@ -105,14 +115,9 @@ export default function LogInForm() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              // 1. Check with backend if email is free
               await axios.post("http://localhost:4000/api/users/check-email", {
                 email: values.email,
               });
-
-              // 2. Email is available! Store it and advance to Step 2
-              setUserEmail(values.email);
-              setStep(2);
             } catch (error: any) {
               const errorMsg =
                 error.response?.data?.error ||

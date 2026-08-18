@@ -45,49 +45,19 @@ export default function FoodMenu() {
             {category.categoryName}
           </h1>
           <div className="grid md:grid-cols-3 md:gap-9">
-            {foods
-              .filter((food) => {
-                const foodCatId =
-                  typeof food.category === "object"
-                    ? food.category?._id
-                    : food.category;
-                return foodCatId === category._id;
-              })
-              .map((food) => (
-                <FoodCard key={food._id} food={food} />
-              ))}
+            {!isLoading &&
+              foods
+                .filter((food) => {
+                  const foodCatId =
+                    typeof food.category === "object"
+                      ? food.category?._id
+                      : food.category;
+                  return foodCatId === category._id;
+                })
+                .map((food) => <FoodCard key={food._id} food={food} />)}
           </div>
         </div>
       ))}
-
-      {/* <div>
-        <h1 className="pb-13.5 text-white text-[30px] font-semibold">Salads</h1>
-        <div className="grid md:grid-cols-3 md:gap-9">
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-        </div>
-      </div>
-      <div>
-        <h1 className="pb-13.5 text-white text-[30px] font-semibold">
-          Lunch favorites
-        </h1>
-        <div className="grid md:grid-cols-3 md:gap-9">
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-        </div>
-      </div>
-      <div>
-        <h1 className="pb-13.5 text-white text-[30px] font-semibold">Salads</h1>
-        <div className="grid md:grid-cols-3 md:gap-9">
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-          <FoodCard id={0} />
-        </div>
-      </div> */}
     </div>
   );
 }

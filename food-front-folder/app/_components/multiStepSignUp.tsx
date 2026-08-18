@@ -29,23 +29,19 @@ export default function MultiStepSignup() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              const usersResponse = await axios.get<User[]>(
-                "http://localhost:8000/user",
-              );
-              const emailTaken = usersResponse.data.some(
-                (user: User) => user.email === values.email,
+              const response = await axios.post<{ emailTaken: boolean }>(
+                "http://localhost:8000/user/check-email",
+                { email: values.email },
               );
 
-              if (emailTaken) {
+              if (response.data.emailTaken) {
                 setFieldError("email", "Email already registered.");
                 return;
               }
               setUserEmail(values.email);
               setStep(2);
             } catch (error: any) {
-              const errorMsg =
-                error.response?.data?.error ||
-                "Email already registered or server error.";
+              const errorMsg = error.response?.data?.error || "Server error.";
               setFieldError("email", errorMsg);
             } finally {
               setSubmitting(false);

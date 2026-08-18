@@ -9,7 +9,7 @@ import { orderRouter } from "./routes/order.js";
 const port = 8000;
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 app.use("/category", categoryRouter);
 app.use("/food", foodRouter);
