@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
-import { CldImage, CldUploadWidget } from "next-cloudinary";
+import { useState, useRef } from "react";
+import { X, Upload } from "lucide-react";
+import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
+
+// Add your actual Cloudinary values here or use process.env references
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 type Category = {
   _id: string;
@@ -21,7 +25,9 @@ export default function AddFoodOverlay({
   onClose,
   onRefresh,
 }: AddFoodOverlayProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null); // Reference to trigger hidden input
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
   const [foodName, setFoodName] = useState<string>("");
   const [foodPrice, setFoodPrice] = useState<number>(0);
   const [foodIngredients, setFoodIngredients] = useState<string>("");
@@ -59,6 +65,57 @@ export default function AddFoodOverlay({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data = await response.json();
+      console.log(data);
+
+      // Return the secure URL from Cloudinary endpoint response [index:1.2.6]
+      return data.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload failed:", error);
+      throw error;
+    }
+  };
+
+  const handleLogoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    try {
+      const url = await uploadToCloudinary(file);
+      if (url) {
+        setFoodImage(url);
+      }
+    } catch (err) {
+      alert("Failed to upload image. Make sure your preset is unsigned!");
+      console.log("Failed to upload logo: " + err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const triggerFileSelect = () => {
+    // Programmatically open the file explorer when clicking the wrapper box [index:1.2.6]
+    fileInputRef.current?.click();
   };
 
   return (
@@ -134,89 +191,40 @@ export default function AddFoodOverlay({
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
               Food Image
             </p>
-            <div className="relative h-32 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
-              <CldUploadWidget
-                // className="w-full h-full cursor-pointer z-10 absolute opacity-0"
-                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                onSuccess={(result: any) => {
-                  if (result?.info?.secure_url) {
-                    setFoodImage(result.info.secure_url);
-                  }
-                }}
-                options={{
-                  // 1. Hide the branding footer
-                  showPoweredBy: false,
 
-                  // 2. Restrict to seamless, standard options
-                  sources: ["local", ],
+            {/* Hidden native input handler */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleLogoUpload}
+              accept="image/*"
+              className="hidden"
+            />
 
-                  // 3. Inject custom styles matching your application
-                  styles: {
-                    palette: {
-                      window: "#FFFFFF", // Main background
-                      windowBorder: "#FFFFFF", // Border accent
-                      tabIcon: "#FFFFFF", // Gray icons
-                      menuIcons: "#FFFFFF",
-                      textDark: "#111827", // Dark typography
-                      textLight: "#FFFFFF", // Light typography
-                      link: "#3B82F6", // Primary Action Link
-                      action: "#2563EB", // Buttons
-                      inactiveTabIcon: "#9CA3AF",
-                      error: "#EF4444",
-                      inProgress: "#3B82F6",
-                      complete: "#10B981", // Success emerald colors
-                      sourceBg: "#F9FAFB", // Sidebar background
-
-                    },
-                    fonts: {
-                      // Matches standard modern sans font-stacks
-                      default: null,
-                    },
-                  },
-                }}
-              >
-                {({ open }) => {
-                  return (
-                    /* 4. Completely custom UI trigger block */
-                    <button
-                      onClick={() => open()}
-                      className="w-full border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-8 flex flex-col items-center justify-center transition group bg-white"
-                    >
-                      <div className="p-3 bg-gray-50 group-hover:bg-blue-50 rounded-full transition mb-3">
-                        <svg
-                          className="w-6 h-6 text-gray-500 group-hover:text-blue-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                          />
-                        </svg>
-                      </div>
-
-                      <span className="text-xs text-gray-400 mt-1">
-                        Drag and drop or click to browse
-                      </span>
-                    </button>
-                  );
-                }}
-              </CldUploadWidget>
-              {foodImage ? (
+            {/* Clickable Card Container */}
+            <div
+              onClick={triggerFileSelect}
+              className="relative h-32 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-300 hover:border-gray-400 bg-gray-50/50 hover:bg-gray-50 transition"
+            >
+              {uploading ? (
+                <span className="text-xs text-gray-500 animate-pulse">
+                  Uploading file to cloud...
+                </span>
+              ) : foodImage ? (
                 <CldImage
-                  className="z-0 object-cover"
-                  src={foodImage}
+                  className="object-cover"
+                  src={foodImage} // CldImage handles full URLs or Public IDs automatically
                   alt="Uploaded food"
                   fill
                   sizes="(max-width: 768px) 100vw, 300px"
                 />
               ) : (
-                <span className="text-xs text-gray-400">
-                  Click to upload image
-                </span>
+                <div className="flex flex-col items-center gap-1">
+                  <Upload className="h-5 w-5 text-gray-400" />
+                  <span className="text-xs text-gray-400">
+                    Click to select food image
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -224,7 +232,7 @@ export default function AddFoodOverlay({
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button
               type="submit"
-              disabled={isSaving || !foodName.trim()}
+              disabled={isSaving || uploading || !foodName.trim()}
               className="rounded-xl bg-red-500 hover:bg-red-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Add Food"}
