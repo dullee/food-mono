@@ -12,10 +12,6 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com", // Allows any image from this host
-      },
-      {
-        protocol: "https",
         hostname: "res.cloudinary.com",
       },
     ],

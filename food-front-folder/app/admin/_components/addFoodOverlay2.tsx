@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { X, Upload } from "lucide-react";
+import { useState, useRef, DragEventHandler } from "react";
+import { X, Image } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 
@@ -20,11 +20,12 @@ type AddFoodOverlayProps = {
   onRefresh: () => Promise<void> | void;
 };
 
-export default function AddFoodOverlay({
+export default function AddFoodOverlay2({
   category,
   onClose,
   onRefresh,
 }: AddFoodOverlayProps) {
+  const [isDragActive, setIsDragActive] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null); // Reference to trigger hidden input
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -70,7 +71,7 @@ export default function AddFoodOverlay({
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("upload_preset", "testing");
 
     try {
       const response = await fetch(
@@ -84,7 +85,6 @@ export default function AddFoodOverlay({
       const data = await response.json();
       console.log(data);
 
-      // Return the secure URL from Cloudinary endpoint response [index:1.2.6]
       return data.secure_url;
     } catch (error) {
       console.error("Cloudinary upload failed:", error);
@@ -114,9 +114,10 @@ export default function AddFoodOverlay({
   };
 
   const triggerFileSelect = () => {
-    // Programmatically open the file explorer when clicking the wrapper box [index:1.2.6]
     fileInputRef.current?.click();
   };
+
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -203,26 +204,44 @@ export default function AddFoodOverlay({
 
             {/* Clickable Card Container */}
             <div
+              // onDragOver={handleDragOver}
+              // onDragLeave={handleDragLeave}
+              // onDrop={handleDrop}
               onClick={triggerFileSelect}
-              className="relative h-32 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-300 hover:border-gray-400 bg-gray-50/50 hover:bg-gray-50 transition"
+              className="relative h-32 bg-[#2563EB]/5  overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition"
             >
               {uploading ? (
                 <span className="text-xs text-gray-500 animate-pulse">
                   Uploading file to cloud...
                 </span>
               ) : foodImage ? (
-                <CldImage
-                  className="object-cover"
-                  src={foodImage} // CldImage handles full URLs or Public IDs automatically
-                  alt="Uploaded food"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 300px"
-                />
+                <>
+                  <CldImage
+                    className="object-cover"
+                    src={foodImage} // CldImage handles full URLs or Public IDs automatically
+                    alt="Uploaded food"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 300px"
+                  />
+                  <Button
+                    variant={"outline"}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents event from traveling down
+                      setFoodImage("");
+                    }}
+                    className={"absolute  right-2 top-2 w-9 h-9 rounded-full"}
+                  >
+                    <X size={16} />
+                  </Button>
+                </>
               ) : (
                 <div className="flex flex-col items-center gap-1">
-                  <Upload className="h-5 w-5 text-gray-400" />
-                  <span className="text-xs text-gray-400">
-                    Click to select food image
+                  <div className="rounded-full p-2 bg-white">
+                    <Image size={16} />
+                  </div>
+
+                  <span className="text-xs">
+                    Choose a file or drag & drop it here
                   </span>
                 </div>
               )}

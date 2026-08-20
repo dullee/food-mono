@@ -6,7 +6,7 @@ import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import Categories from "./categories";
 import EditFoodOverlay from "./editFoodOverlay";
-import AddFoodOverlay from "./addFoodOverlay";
+import AddFoodOverlay from "./addFoodOverlay2";
 import { Food } from "@/app/types/food";
 import { Category } from "@/app/types/category.js";
 
