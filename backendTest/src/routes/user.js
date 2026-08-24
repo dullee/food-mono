@@ -16,7 +16,7 @@ userRouter.post("/check-email", checkEmail);
 // Protected Routes (Requires a valid cookie token)
 userRouter.patch("/", verifyToken, updateUser); // Users can update their own data
 userRouter.get("/me", verifyToken, async (req, res) => {
-  const user = await UserModel.findById(req.user.id).select("name role");
+  const user = await UserModel.findById(req.user.id).select("name email role");
   res.json({ authenticated: true, user });
 });
 
