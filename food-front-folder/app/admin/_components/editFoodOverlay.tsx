@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Trash } from "lucide-react";
 import { CldImage, CldUploadButton } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 type EditFoodOverlayProps = {
   food: Food;
@@ -28,6 +31,7 @@ export default function EditFoodOverlay({
   onRefresh,
 }: EditFoodOverlayProps) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize state directly from passed prop
   const [foodName, setFoodName] = useState<string>(food.foodName || "");
@@ -39,6 +43,8 @@ export default function EditFoodOverlay({
     food.category?._id || "",
   );
   const [foodImage, setFoodImage] = useState<string>(food.image || "");
+  const [dragOverUpload, setDragOverUpload] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   // Update state if selected food prop changes
   useEffect(() => {
@@ -47,6 +53,17 @@ export default function EditFoodOverlay({
     setFoodIngredients(food.ingredients || "");
     setFoodCategoryId(food.category?._id || "");
     setFoodImage(food.image || "");
+    const stopGlobalDrop = (e: globalThis.DragEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("dragover", stopGlobalDrop, true);
+    window.addEventListener("drop", stopGlobalDrop, true);
+
+    return () => {
+      window.removeEventListener("dragover", stopGlobalDrop, true);
+      window.removeEventListener("drop", stopGlobalDrop, true);
+    };
   }, [food]);
 
   const patchFood = async () => {
@@ -111,6 +128,82 @@ export default function EditFoodOverlay({
     }
   };
 
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "testing");
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload failed:", error);
+      throw error;
+    }
+  };
+
+  const processAndUploadFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file);
+      if (url) {
+        setFoodImage(url);
+      }
+    } catch (err) {
+      alert("Failed to upload image. Make sure your preset is unsigned!");
+      console.log("Failed to upload logo: " + err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleLogoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processAndUploadFile(file);
+  };
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // CRITICAL: Keeps event execution scoped strictly inside this component
+    setDragOverUpload(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // CRITICAL
+    setDragOverUpload(false);
+  };
+
+  const handleDragDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // CRITICAL: Stop browser from handling the drop natively
+    setDragOverUpload(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await processAndUploadFile(file);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
@@ -157,8 +250,14 @@ export default function EditFoodOverlay({
                 disabled={isSaving}
                 required
               >
-                <SelectTrigger className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 bg-white outline-none">
-                  <SelectValue placeholder="Select a category" />
+                <SelectTrigger className="w-full focus:ring-4 ring-1 ring-gray-500/9  focus:ring-gray-500/5 rounded-2xl border px-4 py-3 text-sm text-gray-900 bg-white">
+                  <SelectValue placeholder="Select a category">
+                    {
+                      categories.find(
+                        (c) => String(c._id) === String(foodCategoryId),
+                      )?.categoryName
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -198,52 +297,59 @@ export default function EditFoodOverlay({
               />
             </div>
           </div>
-
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleLogoUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDragDrop}
+              onClick={triggerFileSelect}
+              className={`relative h-32 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition ${
+                dragOverUpload
+                  ? "border-blue-500 bg-blue-50/50 scale-[0.98]"
+                  : "border-gray-300 bg-blue-600/5 hover:border-gray-400 hover:bg-gray-50"
+              }`}
+            >
+              {/* <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
               Image
-            </p>
-            <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
-              {foodImage ? (
-                <>
-                  <CldImage
-                    className="z-0 object-cover"
-                    src={foodImage}
-                    alt="Food preview"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 300px"
-                  />
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setFoodImage("");
-                    }}
-                    className={"absolute top-2 right-2 z-10"}
-                  >
-                    X
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <CldUploadButton
-                    className="w-full h-full cursor-pointer z-10 absolute opacity-0"
-                    uploadPreset={
-                      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-                    }
-                    onSuccess={(result: any) => {
-                      if (result?.info?.secure_url) {
-                        setFoodImage(result.info.secure_url);
-                      }
-                    }}
-                  />
-                  <span className="text-xs text-gray-400">
-                    Click to upload new image
+            </p> */}
+              <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
+                {uploading ? (
+                  <span className="text-xs text-gray-500 animate-pulse">
+                    Uploading file to cloud...
                   </span>
-                </>
-              )}
+                ) : foodImage ? (
+                  <div className="relative w-full h-full">
+                    <CldImage
+                      className="object-cover"
+                      src={foodImage}
+                      alt="Uploaded food"
+                      sizes="w-100 h-30"
+                      fill
+                    />
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevents event from traveling down
+                        setFoodImage("");
+                      }}
+                      variant={"outline"}
+                      className="absolute top-2 right-2 rounded-full p-2 bg-white w-9 h-9"
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                ) : (
+                  <span className="text-xs">
+                    {dragOverUpload ? "Drop here!" : "Click or drag image file"}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
