@@ -25,7 +25,6 @@ const OrderSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "user", required: true },
     totalPrice: {
       type: Number,
-      required: true,
     },
     foodOrderItems: [foodOrderItems],
     status: {

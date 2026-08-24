@@ -6,6 +6,13 @@ import { CldImage, CldUploadButton } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { Food } from "@/app/types/food";
 import { Category } from "@/app/types/category.js";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type EditFoodOverlayProps = {
   food: Food;
@@ -144,22 +151,23 @@ export default function EditFoodOverlay({
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                 Dish Category
               </label>
-              <select
+              <Select
                 value={foodCategoryId}
-                onChange={(e) => setFoodCategoryId(e.target.value)}
+                onValueChange={(val) => setFoodCategoryId(val || "")}
                 disabled={isSaving}
-                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 bg-white outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
                 required
               >
-                <option value="" disabled>
-                  Select a category
-                </option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.categoryName}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 bg-white outline-none">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.categoryName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -196,27 +204,45 @@ export default function EditFoodOverlay({
               Image
             </p>
             <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
-              <CldUploadButton
-                className="w-full h-full cursor-pointer z-10 absolute opacity-0"
-                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                onSuccess={(result: any) => {
-                  if (result?.info?.secure_url) {
-                    setFoodImage(result.info.secure_url);
-                  }
-                }}
-              />
               {foodImage ? (
-                <CldImage
-                  className="z-0 object-cover"
-                  src={foodImage}
-                  alt="Food preview"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 300px"
-                />
+                <>
+                  <CldImage
+                    className="z-0 object-cover"
+                    src={foodImage}
+                    alt="Food preview"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 300px"
+                  />
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setFoodImage("");
+                    }}
+                    className={"absolute top-2 right-2 z-10"}
+                  >
+                    X
+                  </Button>
+                </>
               ) : (
-                <span className="text-xs text-gray-400">
-                  Click to upload new image
-                </span>
+                <>
+                  <CldUploadButton
+                    className="w-full h-full cursor-pointer z-10 absolute opacity-0"
+                    uploadPreset={
+                      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+                    }
+                    onSuccess={(result: any) => {
+                      if (result?.info?.secure_url) {
+                        setFoodImage(result.info.secure_url);
+                      }
+                    }}
+                  />
+                  <span className="text-xs text-gray-400">
+                    Click to upload new image
+                  </span>
+                </>
               )}
             </div>
           </div>
