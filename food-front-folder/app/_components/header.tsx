@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserIcon, ShoppingCart, MapPin, ChevronRight, X } from "lucide-react";
 import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
+import CartOverlay from "./cartOverlay";
 
 import {
   Popover,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/popover";
 
 interface UserProfile {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: string;
@@ -22,7 +23,6 @@ export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
-  const [activeCartButton, setActiveCartButton] = useState<string>("cart");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -100,41 +100,7 @@ export default function Header() {
         </div>
       </div>
       {showCart && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/30 text-white w-screen h-screen">
-          <div className="w-full max-w-md h-full bg-[#404040] p-8 gap-6 flex flex-col rounded-2xl shadow-xl relative">
-            <div className="flex justify-between items-center">
-              <div className="flex gap-3">
-                <ShoppingCart />
-                <h2 className="text-lg font-bold">Order details</h2>
-              </div>
-
-              <Button
-                variant={"outline"}
-                onClick={() => setShowCart(false)}
-                className="bg-[#404040] w-9 h-9"
-              >
-                <X size={16} />
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-white">
-              <Button
-                onClick={() => setActiveCartButton("cart")}
-                className={`w-full bg-white text-black ${activeCartButton === "cart" && "bg-[#EF4444] text-white"}`}
-              >
-                Cart
-              </Button>
-              <Button
-                onClick={() => setActiveCartButton("order")}
-                className={`w-full bg-white text-black ${activeCartButton === "order" && "bg-[#EF4444] text-white"}`}
-              >
-                Order
-              </Button>
-            </div>
-            <div className="bg-white rounded-2xl h-full p-4 text-[#71717A]">
-              <h2>My {activeCartButton}</h2>
-            </div>
-          </div>
-        </div>
+        <CartOverlay onClose={() => setShowCart(false)} userId={user?._id} />
       )}
     </>
   );

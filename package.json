@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev:front": "npm run dev --workspace=food-front-folder",
-    "dev:back": "npm run dev --workspace=backendtest",
+    "dev:back": "npm run dev --workspace=backendTest",
     "dev": "npx concurrently \"npm run dev:back\" \"npm run dev:front\""
   },
   "dependencies": {
