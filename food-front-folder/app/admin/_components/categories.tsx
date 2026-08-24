@@ -25,34 +25,34 @@ export default function Categories({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const [catRes, foodRes] = await Promise.all([
-          fetch("http://localhost:8000/category"),
-          fetch("http://localhost:8000/food"),
-        ]);
-
-        if (!catRes.ok || !foodRes.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
-        const catData = await catRes.json();
-        const foodData = await foodRes.json();
-
-        setTotalFoodCount(catData.AllFoodCount);
-        setCategories(catData.categories);
-        setFoods(foodData);
-      } catch (err) {
-        console.error("Database connection error via backend:", err);
-        setError("Express server is offline.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadInitialData();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [catRes, foodRes] = await Promise.all([
+        fetch("http://localhost:8000/category"),
+        fetch("http://localhost:8000/food"),
+      ]);
+
+      if (!catRes.ok || !foodRes.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const catData = await catRes.json();
+      const foodData = await foodRes.json();
+
+      setTotalFoodCount(catData.AllFoodCount);
+      setCategories(catData.categories);
+      setFoods(foodData);
+    } catch (err) {
+      console.error("Database connection error via backend:", err);
+      setError("Express server is offline.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const selectCategoryFilter = (categoryId: string) => {
     if (selectedCategory !== categoryId) {
@@ -97,7 +97,7 @@ export default function Categories({
       if (!response.ok) {
         throw new Error(data.message || "Failed to create category");
       }
-
+      fetchData();
       return data.category;
     } catch (err: any) {
       alert(`Error: ${err.message}`);
