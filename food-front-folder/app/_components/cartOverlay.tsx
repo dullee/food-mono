@@ -3,7 +3,7 @@
 import { X, ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { FoodOrderItemsProps } from "../types/order.js";
+import { Order } from "../types/order";
 import Image from "next/image.js";
 
 type CartOverlayProps = {
@@ -13,13 +13,14 @@ type CartOverlayProps = {
 
 export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
   const [activeCartButton, setActiveCartButton] = useState<string>("cart");
-  const [orders, setOrders] = useState<FoodOrderItemsProps[]>([]);
+  const [orders, setOrders] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const res = await fetch(
+          //test replace with userId when able to create order ---------------------------------------------------
           `http://localhost:8000/order/6a74052c0cebb0f4dbc2565c`,
           {
             credentials: "include", // Sends auth cookie automatically
@@ -29,8 +30,8 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
-        setOrders(data.orders.foodOrderItems);
-        console.log(data.orders.foodOrderItems);
+        setOrders(data.orders);
+        console.log(data.orders);
       } catch (err) {
         console.error("Failed to load orders:", err);
       } finally {
@@ -73,13 +74,13 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
           </Button>
         </div>
         <div className="bg-white rounded-2xl font-bold text-xl h-full p-4 flex flex-col gap-5 text-[#71717A]">
-          <h2>My {activeCartButton}</h2>
-
           <div className="flex flex-col gap-5">
+            <h2>{activeCartButton === "cart" ? "My cart" : "Order history"}</h2>
             {!loading &&
-              orders.map((order, index) => (
+              activeCartButton === "cart" &&
+              orders?.foodOrderItems.map((order, index) => (
                 <div key={index} className="flex gap-2.5">
-                  <div className="w-[124px] h-[120px] shrink-0 relative rounded-xl overflow-hidden">
+                  <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
                     <Image
                       src={order.food.image}
                       alt={order.food.foodName}
@@ -112,7 +113,7 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
                         <Button variant={"ghost"} className="p-2.5 ">
                           <Minus size={16} />
                         </Button>
-                        <p >{order.quantity}</p>
+                        <p>{order.quantity}</p>
                         <Button variant={"ghost"} className="p-2.5 ">
                           <Plus size={16} />
                         </Button>
@@ -122,6 +123,26 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
                   </div>
                 </div>
               ))}
+            {!loading && activeCartButton === "order" && (
+              <div>
+                <div>
+                  <div className="flex justify-between">
+                    <h1>${orders?.totalPrice}</h1>
+
+                    <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black">{orders?.status}</div>
+                  </div>
+
+                  <div>
+                    {orders?.foodOrderItems.map((food, index) => (
+                      <div key={index} className="flex justify-between">
+                        <p> {food.food.foodName} </p>
+                        <p> x {food.quantity}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
