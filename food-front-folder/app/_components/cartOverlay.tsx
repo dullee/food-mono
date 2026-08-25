@@ -1,6 +1,6 @@
 "use client";
 
-import { X, ShoppingCart } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { FoodOrderItemsProps } from "../types/order.js";
@@ -72,10 +72,10 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
             Order
           </Button>
         </div>
-        <div className="bg-white rounded-2xl h-full p-4 text-[#71717A]">
+        <div className="bg-white rounded-2xl font-bold text-xl h-full p-4 flex flex-col gap-5 text-[#71717A]">
           <h2>My {activeCartButton}</h2>
 
-          <div>
+          <div className="flex flex-col gap-5">
             {!loading &&
               orders.map((order, index) => (
                 <div key={index} className="flex gap-2.5">
@@ -90,8 +90,13 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
                   <div className="flex flex-col justify-between max-w-76.25 w-full">
                     <div className="flex justify-between  w-full">
                       <div className="flex flex-col ">
-                        <h1>{order.food.foodName}</h1>
-                        <p className="text-xs ">{order.food.ingredients}</p>
+                        <h1 className="text-base text-[#EF4444]">
+                          {order.food.foodName}
+                        </h1>
+
+                        <p className="text-xs font-normal text-black">
+                          {order.food.ingredients}
+                        </p>
                       </div>
 
                       <Button
@@ -102,8 +107,16 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
                       </Button>
                     </div>
 
-                    <div className="flex justify-between">
-                      <p>{order.quantity}</p>
+                    <div className="flex justify-between text-black">
+                      <div className="flex gap-3 items-center ">
+                        <Button variant={"ghost"} className="p-2.5 ">
+                          <Minus size={16} />
+                        </Button>
+                        <p >{order.quantity}</p>
+                        <Button variant={"ghost"} className="p-2.5 ">
+                          <Plus size={16} />
+                        </Button>
+                      </div>
                       <p>${order.food.price}</p>
                     </div>
                   </div>
