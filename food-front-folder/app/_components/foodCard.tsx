@@ -164,7 +164,10 @@ export default function FoodCard({ food }: FoodProps) {
                       variant={"outline"}
                       className={"w-11 h-11"}
                       onClick={() =>
-                        setOrderAmount(orderAmount - (orderAmount > 1 ? 1 : 0))
+                        updateCartQuantity(
+                          food._id,
+                          orderAmount - (orderAmount > 1 ? 1 : 0),
+                        )
                       }
                     >
                       <Minus />
@@ -173,7 +176,9 @@ export default function FoodCard({ food }: FoodProps) {
                     <Button
                       variant={"outline"}
                       className={"w-11 h-11 border-black"}
-                      onClick={() => setOrderAmount(orderAmount + 1)}
+                      onClick={() =>
+                        updateCartQuantity(food._id, orderAmount + 1)
+                      }
                     >
                       <Plus />
                     </Button>
