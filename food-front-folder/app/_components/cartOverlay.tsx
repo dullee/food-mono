@@ -1,6 +1,6 @@
 "use client";
 
-import { X, ShoppingCart, Minus, Plus } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus, Soup } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Order } from "../types/order";
@@ -21,7 +21,7 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
       try {
         const res = await fetch(
           //test replace with userId when able to create order ---------------------------------------------------
-          `http://localhost:8000/order/6a74052c0cebb0f4dbc2565c`,
+          `${process.env.NEXT_PUBLIC_API_URL}/order/6a74052c0cebb0f4dbc2565c`,
           {
             credentials: "include", // Sends auth cookie automatically
           },
@@ -125,20 +125,29 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
               ))}
             {!loading && activeCartButton === "order" && (
               <div>
-                <div>
+                <div className="flex flex-col gap-3 px-3">
                   <div className="flex justify-between">
-                    <h1>${orders?.totalPrice}</h1>
+                    <h1 className="text-black text-base">
+                      ${orders?.totalPrice}
+                    </h1>
 
-                    <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black">{orders?.status}</div>
+                    <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black">
+                      {orders?.status}
+                    </div>
                   </div>
 
-                  <div>
+                  <div className="flex flex-col gap-3 text-xs font-medium">
                     {orders?.foodOrderItems.map((food, index) => (
                       <div key={index} className="flex justify-between">
-                        <p> {food.food.foodName} </p>
-                        <p> x {food.quantity}</p>
+                        <div className="flex gap-2">
+                          <Soup size={16}/>
+                          <p> {food.food.foodName} </p>
+                        </div>
+
+                        <p className="text-black"> x {food.quantity}</p>
                       </div>
                     ))}
+                    <p>{orders?.updatedAt}</p>
                   </div>
                 </div>
               </div>

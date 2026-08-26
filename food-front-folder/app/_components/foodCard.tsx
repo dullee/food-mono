@@ -31,7 +31,7 @@ export default function FoodCard({ food }: FoodProps) {
 
   async function addToCart() {
     try {
-      await axios.post("http://localhost:8000/order", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
         ...food,
       });
       triggerAlert();

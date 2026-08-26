@@ -27,7 +27,7 @@ export default function Header() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("http://localhost:8000/user/me", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include", // Crucial to send the cookie up

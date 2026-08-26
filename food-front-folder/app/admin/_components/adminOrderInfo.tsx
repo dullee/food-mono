@@ -71,7 +71,7 @@ function StateDropdownCell({
     setIsUpdating(true);
 
     try {
-      await fetch(`http://localhost:8000/order`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _id: orderId, status: newState }),
@@ -241,7 +241,7 @@ export default function AdminOrderInfo() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch("http://localhost:8000/order");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`);
         if (!res.ok) throw new Error("Failed to fetch orders");
         const data = await res.json();
         setOrders(data);

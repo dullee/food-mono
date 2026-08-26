@@ -67,7 +67,7 @@ export default function EditFoodOverlay({
   }, [food]);
 
   const patchFood = async () => {
-    const response = await fetch(`http://localhost:8000/food`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/food`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -86,7 +86,7 @@ export default function EditFoodOverlay({
   };
 
   const deleteFood = async (_id: string) => {
-    const response = await fetch(`http://localhost:8000/food/${_id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/food/${_id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });

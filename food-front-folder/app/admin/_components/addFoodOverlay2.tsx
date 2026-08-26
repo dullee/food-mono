@@ -49,7 +49,7 @@ export default function AddFoodOverlay2({
   }, []);
 
   const addFood = async () => {
-    const response = await fetch(`http://localhost:8000/food`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/food`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

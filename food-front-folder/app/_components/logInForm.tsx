@@ -28,7 +28,7 @@ export default function LogInForm() {
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
               const response = await axios.post(
-                "http://localhost:8000/user/login",
+                `${process.env.NEXT_PUBLIC_API_URL}/user/login`,
                 {
                   email: values.email,
                   password: values.password,
@@ -115,7 +115,7 @@ export default function LogInForm() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              await axios.post("http://localhost:4000/api/users/check-email", {
+              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/check-email`, {
                 email: values.email,
               });
             } catch (error: any) {

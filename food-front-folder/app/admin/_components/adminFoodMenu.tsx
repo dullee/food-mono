@@ -26,7 +26,7 @@ export default function AdminFoodMenu() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:8000/category");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
       if (!res.ok) throw new Error("Failed to fetch categories");
       const data = await res.json();
       setCategories(data.categories);
@@ -39,7 +39,7 @@ export default function AdminFoodMenu() {
 
   const fetchFoods = async () => {
     try {
-      const res = await fetch("http://localhost:8000/food");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/food`);
       if (!res.ok) throw new Error("Failed to fetch foods");
       const data = await res.json();
       setFoods(data);

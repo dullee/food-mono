@@ -15,8 +15,8 @@ export default function FoodMenu() {
       setIsLoading(true);
       try {
         const [catRes, foodRes] = await Promise.all([
-          fetch("http://localhost:8000/category"),
-          fetch("http://localhost:8000/food"),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/food`),
         ]);
 
         if (!catRes.ok || !foodRes.ok) {

@@ -30,7 +30,7 @@ export default function MultiStepSignup() {
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
               const response = await axios.post<{ emailTaken: boolean }>(
-                "http://localhost:8000/user/check-email",
+                `${process.env.NEXT_PUBLIC_API_URL}/user/check-email`,
                 { email: values.email },
               );
 
@@ -97,7 +97,7 @@ export default function MultiStepSignup() {
           })}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              await axios.post("http://localhost:8000/user", {
+              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
                 email: userEmail,
                 password: values.password,
               });
