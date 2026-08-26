@@ -27,11 +27,14 @@ export default function Header() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // Crucial to send the cookie up
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // Crucial to send the cookie up
+          },
+        );
         if (!response.ok) {
           setUser(null);
           return;
@@ -99,7 +102,7 @@ export default function Header() {
           )}
         </div>
       </div>
-      {showCart && (
+      {showCart && !loading && (
         <CartOverlay onClose={() => setShowCart(false)} userId={user?._id} />
       )}
     </>

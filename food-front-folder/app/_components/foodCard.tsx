@@ -6,16 +6,25 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Check, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Food } from "../types/food.js";
+
+type CartItem = {
+  food: Food;
+  quantity: number;
+};
 
 type FoodProps = {
   food: Food;
 };
 
+const CART_KEY = "food_cart";
+
 export default function FoodCard({ food }: FoodProps) {
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
   const [showFoodDetail, setshowFoodDetail] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState(true);
   const [showAddedAlert, setShowAddedAlert] = useState<boolean>(false);
   const [orderAmount, setOrderAmount] = useState<number>(1);
 
@@ -29,20 +38,55 @@ export default function FoodCard({ food }: FoodProps) {
     }, duration);
   }
 
-  async function addToCart() {
+  const getCart = (): CartItem[] => {
+    if (typeof window === "undefined") return [];
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
-        ...food,
-      });
-      triggerAlert();
-      setAddedToCart(true);
-      console.log("Food added successfully!");
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.error || error.message || "Unknown error";
-      console.log("Error:", errorMsg);
+      const data = localStorage.getItem(CART_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (err) {
+      console.error("Failed to parse cart:", err);
+      return [];
     }
-  }
+  };
+  const addToCart = (quantityToAdd: number): CartItem[] => {
+    const currentCart = getCart();
+    const existingIndex = currentCart.findIndex(
+      (item) => item.food._id === food._id,
+    );
+
+    if (existingIndex > -1) {
+      // Item already in cart: update its quantity
+      currentCart[existingIndex].quantity += quantityToAdd;
+    } else {
+      // New item: append to cart
+      currentCart.push({ food, quantity: quantityToAdd });
+    }
+
+    triggerAlert();
+    localStorage.setItem(CART_KEY, JSON.stringify(currentCart));
+    console.log(localStorage);
+    return currentCart;
+  };
+
+  // Update exact quantity directly (+ / - buttons in cart view)
+  const updateCartQuantity = (
+    foodId: string,
+    newQuantity: number,
+  ): CartItem[] => {
+    let currentCart = getCart();
+
+    if (newQuantity <= 0) {
+      // Remove item if quantity drops to 0
+      currentCart = currentCart.filter((item) => item.food._id !== foodId);
+    } else {
+      currentCart = currentCart.map((item) =>
+        item.food._id === foodId ? { ...item, quantity: newQuantity } : item,
+      );
+    }
+
+    localStorage.setItem(CART_KEY, JSON.stringify(currentCart));
+    return currentCart;
+  };
 
   return (
     <>
@@ -56,7 +100,7 @@ export default function FoodCard({ food }: FoodProps) {
             onClick={() => setshowFoodDetail(true)}
           />
           <Button
-            onClick={() => addToCart()}
+            onClick={() => addToCart(1)}
             className={`absolute ${addedToCart ? "bg-black " : "bg-white"} bottom-5 right-5  cursor-pointer rounded-full w-11 h-11 text-[#EF4444]`}
           >
             {addedToCart ? <Check size={16} /> : <Plus size={16} />}
@@ -135,7 +179,12 @@ export default function FoodCard({ food }: FoodProps) {
                     </Button>
                   </div>
                 </div>
-                <Button className={"w-full"}>Add to card</Button>
+                <Button
+                  onClick={() => addToCart(orderAmount)}
+                  className={"w-full"}
+                >
+                  Add to card
+                </Button>
               </div>
             </div>
           </div>

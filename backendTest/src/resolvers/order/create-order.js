@@ -1,25 +1,27 @@
 import { OrderModel } from "../../models/order-model.js";
 import { foodModel } from "../../models/food-model.js";
+import { UserModel } from "../../models/user-model.js";
 
 export const createOrder = async (req, res) => {
   try {
     const foodOrderItems = req.body.foodOrderItems;
 
-    if (!foodOrderItems || !Array.isArray(foodOrderItems) || foodOrderItems.length === 0) {
+    if (
+      !foodOrderItems ||
+      !Array.isArray(foodOrderItems) ||
+      foodOrderItems.length === 0
+    ) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // 1. Map item.food to get the array of IDs
     const foodIds = foodOrderItems.map((item) => item.food);
 
-    // 2. Fetch food records from DB
     const dbFoods = await foodModel.find({ _id: { $in: foodIds } });
     const foodMap = new Map(dbFoods.map((food) => [food._id.toString(), food]));
 
     let totalPrice = 0;
     const orderItems = [];
 
-    // 3. Loop through items and calculate secure backend total
     for (const item of foodOrderItems) {
       const foodDoc = foodMap.get(item.food); // Reads item.food directly
 
@@ -47,6 +49,12 @@ export const createOrder = async (req, res) => {
       user: userId,
       totalPrice: totalPrice,
       foodOrderItems: orderItems,
+    });
+
+    console.log(newOrder);
+
+    await UserModel.findByIdAndUpdate(userId, {
+      $push: { orderedFoods: newOrder._id },
     });
 
     return res.status(201).json({
