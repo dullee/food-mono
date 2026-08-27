@@ -9,7 +9,7 @@ import { Food } from "../types/food.js";
 
 type CartOverlayProps = {
   onClose: () => void;
-  userId?: string; // Type signature for a function taking no args and returning nothing
+  userId?: string;
 };
 
 interface CartItem {

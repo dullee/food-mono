@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Food } from "../types/food.js";
+import { toast } from "sonner";
 
 type CartItem = {
   food: Food;
@@ -24,18 +25,15 @@ export default function FoodCard({ food }: FoodProps) {
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
   const [showFoodDetail, setshowFoodDetail] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState(true);
   const [showAddedAlert, setShowAddedAlert] = useState<boolean>(false);
   const [orderAmount, setOrderAmount] = useState<number>(1);
 
-  const duration: number = 1000;
-
   function triggerAlert() {
-    setShowAddedAlert(true);
-
-    setTimeout(() => {
-      setShowAddedAlert(false);
-    }, duration);
+    toast("Food is being added to the cart!", {
+      position: "top-center",
+      className: "!bg-black !text-white !text-xl !p-4",
+      icon: <Check size={16} />,
+    });
   }
 
   const getCart = (): CartItem[] => {
@@ -61,30 +59,12 @@ export default function FoodCard({ food }: FoodProps) {
       // New item: append to cart
       currentCart.push({ food, quantity: quantityToAdd });
     }
-
+    setAddedToCart(true);
     triggerAlert();
     localStorage.setItem(CART_KEY, JSON.stringify(currentCart));
     console.log(localStorage);
-    return currentCart;
-  };
+    setOrderAmount(1);
 
-  // Update exact quantity directly (+ / - buttons in cart view)
-  const updateCartQuantity = (
-    foodId: string,
-    newQuantity: number,
-  ): CartItem[] => {
-    let currentCart = getCart();
-
-    if (newQuantity <= 0) {
-      // Remove item if quantity drops to 0
-      currentCart = currentCart.filter((item) => item.food._id !== foodId);
-    } else {
-      currentCart = currentCart.map((item) =>
-        item.food._id === foodId ? { ...item, quantity: newQuantity } : item,
-      );
-    }
-
-    localStorage.setItem(CART_KEY, JSON.stringify(currentCart));
     return currentCart;
   };
 
@@ -163,12 +143,8 @@ export default function FoodCard({ food }: FoodProps) {
                     <Button
                       variant={"outline"}
                       className={"w-11 h-11"}
-                      onClick={() =>
-                        updateCartQuantity(
-                          food._id,
-                          orderAmount - (orderAmount > 1 ? 1 : 0),
-                        )
-                      }
+                      disabled={orderAmount <= 1}
+                      onClick={() => setOrderAmount(orderAmount - 1)}
                     >
                       <Minus />
                     </Button>
@@ -176,9 +152,7 @@ export default function FoodCard({ food }: FoodProps) {
                     <Button
                       variant={"outline"}
                       className={"w-11 h-11 border-black"}
-                      onClick={() =>
-                        updateCartQuantity(food._id, orderAmount + 1)
-                      }
+                      onClick={() => setOrderAmount(orderAmount + 1)}
                     >
                       <Plus />
                     </Button>
@@ -193,16 +167,6 @@ export default function FoodCard({ food }: FoodProps) {
               </div>
             </div>
           </div>
-        </div>
-      )}
-      {showAddedAlert && (
-        <div className="fixed w-screen h-screen top-28 left-0 z-100 flex justify-center">
-          <Alert className="bg-black rounded-md border max-w-93 animate-toast text-white pl-4 pr-6 max-h-12 h-full gap-3 flex items-center">
-            <Check size={16} />
-            <p className="font-medium text-[20px]">
-              Food is being added to the cart!
-            </p>
-          </Alert>
         </div>
       )}
     </>
