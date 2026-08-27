@@ -15,5 +15,5 @@ export const getCategory = async (req, res) => {
 
   const AllFoodCount = await foodModel.countDocuments();
 
-  res.status(200).json({ categories: result, AllFoodCount });x
+  res.status(200).json({ categories: result, AllFoodCount });
 };
