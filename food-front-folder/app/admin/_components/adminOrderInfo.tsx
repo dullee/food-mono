@@ -26,8 +26,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Order } from "@/app/types/order.js";
 
+import { addDays, format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { type DateRange } from "react-day-picker";
 
-let pageNumber = 1
+import { Calendar } from "@/components/ui/calendar";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+let pageNumber = 1;
 
 function SquareToggleButton() {
   const [checked, setChecked] = useState(false);
@@ -165,7 +176,10 @@ export const columns: ColumnDef<Order>[] = [
                       alt={item.food?.foodName || "Food image"}
                       fill
                       className="object-cover"
-                      src={item.food?.image}
+                      src={
+                        item.food?.image ||
+                        "https://res.cloudinary.com/q36xcdm5/image/upload/v1785501876/cld-sample-4.jpg"
+                      }
                       sizes="36px"
                     />
                   </div>
@@ -235,8 +249,10 @@ export const columns: ColumnDef<Order>[] = [
 
 export default function AdminOrderInfo() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrder] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -252,8 +268,25 @@ export default function AdminOrderInfo() {
         setIsLoading(false);
       }
     };
+
     fetchOrders();
-  }, []);
+    if (date?.from && date.to) {
+      filterOrdersByDate();
+    }
+  }, [date]);
+
+  const filterOrdersByDate = () => {
+    const result = orders.filter((order) => {
+      if (order.createdAt && date?.from && date.to) {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= date?.from && orderDate <= date.to;
+      }
+      return false;
+    });
+    setFilteredOrder(result);
+  };
+
+  console.log("ordesr data", orders);
 
   return (
     <div>
@@ -263,11 +296,44 @@ export default function AdminOrderInfo() {
           <h3 className="text-sm text-gray-500">{orders.length} items</h3>
         </div>
         <div className="flex gap-3">
-          <Button variant={"outline"} className={"px-4 py-2"}>
-            <CalendarRange className="mr-2 h-4 w-4" /> 13 June 2023 - 14 July
-            2023
-          </Button>
-          <Button>Change delivery state</Button>
+          <Field className="mx-auto w-60">
+            <FieldLabel htmlFor="date-picker-range">
+              Date Picker Range
+            </FieldLabel>
+            <Popover>
+              <PopoverTrigger>
+                <Button
+                  variant="outline"
+                  id="date-picker-range"
+                  className="justify-start px-2.5 font-normal"
+                >
+                  <CalendarIcon data-icon="inline-start" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, "LLL dd, y")} -{" "}
+                        {format(date.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(date.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={setDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </Field>
         </div>
       </div>
       <div className="flex flex-col">
@@ -277,7 +343,9 @@ export default function AdminOrderInfo() {
           </p>
         )}
         {error && <p className="text-sm text-red-500 py-4 px-4">{error}</p>}
-        {!isLoading && !error && <DataTable columns={columns} data={orders} />}
+        {!isLoading && !error && (
+          <DataTable columns={columns} data={filteredOrders} />
+        )}
       </div>
       <Pagination>
         <PaginationContent>
