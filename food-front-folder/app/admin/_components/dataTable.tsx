@@ -19,6 +19,7 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pageSize?: number;
 }
 
 export function DataTable<TData, TValue>({

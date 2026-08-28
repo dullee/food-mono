@@ -3,13 +3,12 @@
 import { CldImage } from "next-cloudinary";
 
 import { Button } from "@/components/ui/button";
-import { Check, CalendarRange, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, CalendarIcon } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -24,28 +23,36 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Order } from "@/app/types/order.js";
 
-import { addDays, format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { type DateRange } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/calendar";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-let pageNumber = 1;
-
-function SquareToggleButton() {
-  const [checked, setChecked] = useState(false);
-
+function SquareToggleButton({
+  checked,
+  onToggle,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+}) {
   return (
     <button
-      onClick={() => setChecked(!checked)}
+      onClick={onToggle}
       className={`h-5 w-5 rounded border transition-colors flex items-center justify-center ${
         checked
           ? "bg-black text-white border-black"
@@ -58,27 +65,44 @@ function SquareToggleButton() {
   );
 }
 
-// Fixed missing closing bracket and added status change handler
+function DateCell({ dateStr }: { dateStr?: string }) {
+  const [formattedDate, setFormattedDate] = useState<string>("");
+
+  useEffect(() => {
+    if (dateStr) {
+      setFormattedDate(new Date(dateStr).toLocaleDateString());
+    }
+  }, [dateStr]);
+
+  if (!dateStr) return <span className="text-gray-400">N/A</span>;
+
+  return (
+    <span className="text-xs text-gray-600">
+      {formattedDate || dateStr.split("T")[0]}
+    </span>
+  );
+}
+
 function StateDropdownCell({
   orderId,
   initialState,
+  onStatusUpdated,
 }: {
   orderId: string;
   initialState: Order["status"];
+  onStatusUpdated: (id: string, newStatus: Order["status"]) => void;
 }) {
-  const [state, setState] = useState(initialState);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const stateStyles: Record<string, string> = {
-    DELIVERED: "  border-green-500 hover:bg-green-200",
-    PENDING: "  border-red-600 hover:bg-red-200",
-    CANCELED: " border-gray-500 hover:bg-red-200",
+    DELIVERED: "border-green-500 hover:bg-green-200",
+    PENDING: "border-red-600 hover:bg-red-200",
+    CANCELED: "border-gray-500 hover:bg-red-200",
   };
 
   const options: Order["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
 
-  const handleStatusChange = async (newState: string) => {
-    setState(newState);
+  const handleStatusChange = async (newState: Order["status"]) => {
     setIsUpdating(true);
 
     try {
@@ -87,6 +111,7 @@ function StateDropdownCell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _id: orderId, status: newState }),
       });
+      onStatusUpdated(orderId, newState);
     } catch (err) {
       console.error("Failed to update status on server:", err);
     } finally {
@@ -99,10 +124,10 @@ function StateDropdownCell({
       <DropdownMenuTrigger
         disabled={isUpdating}
         className={`h-7 px-2.5 rounded-full text-xs font-medium border flex items-center gap-1 transition-colors ${
-          stateStyles[state] || "bg-gray-100 text-gray-800"
+          stateStyles[initialState] || "bg-gray-100 text-gray-800"
         }`}
       >
-        {isUpdating ? "Updating..." : state}
+        {isUpdating ? "Updating..." : initialState}
         <ChevronDown className="h-3 w-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -118,25 +143,37 @@ function StateDropdownCell({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} // 👈 Added missing closing bracket here!
+}
 
-// 2. Define the columns layout
-export const columns: ColumnDef<Order>[] = [
-  // Square Toggle Button
+export const getColumns = (
+  currentPage: number,
+  itemsPerPage: number,
+  selectedRowIds: Set<string>,
+  toggleRowSelection: (id: string) => void,
+  onStatusUpdated: (id: string, newStatus: Order["status"]) => void,
+): ColumnDef<Order>[] => [
   {
     id: "toggle",
     header: "Label",
-    cell: () => <SquareToggleButton />,
+    cell: ({ row }) => {
+      const orderId = row.original._id;
+      return (
+        <SquareToggleButton
+          checked={selectedRowIds.has(orderId)}
+          onToggle={() => toggleRowSelection(orderId)}
+        />
+      );
+    },
   },
-  // Row Number
   {
     id: "number",
     header: "№",
     cell: ({ row }) => (
-      <span className="font-medium text-gray-500">{row.index + 1}</span>
+      <span className="font-medium text-gray-500">
+        {(currentPage - 1) * itemsPerPage + row.index + 1}
+      </span>
     ),
   },
-  // Customer Email
   {
     accessorKey: "user.email",
     header: "Customer",
@@ -146,13 +183,11 @@ export const columns: ColumnDef<Order>[] = [
       </span>
     ),
   },
-  // Food Count + Dropdown Details
   {
     id: "foodOrderItems",
     header: "Food",
     cell: ({ row }) => {
       const foodItems = row.original.foodOrderItems || [];
-
       const totalCount = foodItems.reduce(
         (acc, item) => acc + (item.quantity || 0),
         0,
@@ -183,14 +218,10 @@ export const columns: ColumnDef<Order>[] = [
                       sizes="36px"
                     />
                   </div>
-
-                  {/* Food Name */}
                   <span className="truncate font-medium">
                     {item.food?.foodName || "Item"}
                   </span>
                 </div>
-
-                {/* Quantity */}
                 <span className="font-semibold text-gray-500 shrink-0">
                   x{item.quantity}
                 </span>
@@ -201,21 +232,11 @@ export const columns: ColumnDef<Order>[] = [
       );
     },
   },
-  // Date
   {
     accessorKey: "createdAt",
     header: "Date",
-    cell: ({ row }) => {
-      const dateStr = row.original.createdAt;
-      if (!dateStr) return <span className="text-gray-400">N/A</span>;
-      return (
-        <span className="text-xs text-gray-600">
-          {new Date(dateStr).toLocaleDateString()}
-        </span>
-      );
-    },
+    cell: ({ row }) => <DateCell dateStr={row.original.createdAt} />,
   },
-  // Total Price
   {
     accessorKey: "totalPrice",
     header: "Total",
@@ -224,7 +245,6 @@ export const columns: ColumnDef<Order>[] = [
       return <span className="font-medium">${amount.toFixed(2)}</span>;
     },
   },
-  // Delivery Address
   {
     accessorKey: "user.address",
     header: "Delivery Address",
@@ -234,7 +254,6 @@ export const columns: ColumnDef<Order>[] = [
       </span>
     ),
   },
-  // Delivery State Dropdown Button
   {
     accessorKey: "status",
     header: "Delivery State",
@@ -242,6 +261,7 @@ export const columns: ColumnDef<Order>[] = [
       <StateDropdownCell
         orderId={row.original._id}
         initialState={row.original.status}
+        onStatusUpdated={onStatusUpdated}
       />
     ),
   },
@@ -253,7 +273,20 @@ export default function AdminOrderInfo() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState<DateRange | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
+  const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<Order["status"] | null>(
+    null,
+  );
+  const [isMounted, setIsMounted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -261,8 +294,6 @@ export default function AdminOrderInfo() {
         if (!res.ok) throw new Error("Failed to fetch orders");
         const data = await res.json();
         setOrders(data);
-
-        // Filter immediately with fetched data
         filterOrdersByDate(data, date);
       } catch (err) {
         console.error("Database connection error via backend", err);
@@ -277,24 +308,24 @@ export default function AdminOrderInfo() {
     } else {
       filterOrdersByDate(orders, date);
     }
-  }, [date]);
+  }, [date]); // Consistent single-array dependency
 
   const filterOrdersByDate = (
     allOrders: Order[],
     range: DateRange | undefined,
   ) => {
-    // If no date or no 'from' date is selected, return all orders
+    setCurrentPage(1);
+
     if (!range || !range.from) {
       setFilteredOrder(allOrders);
       return;
     }
 
     const fromDate = new Date(range.from);
-    fromDate.setHours(0, 0, 0, 0); // Start of day
+    fromDate.setHours(0, 0, 0, 0);
 
-    // If 'to' is selected, filter by range; otherwise, filter for just 'from' date
     const toDate = range.to ? new Date(range.to) : new Date(range.from);
-    toDate.setHours(23, 59, 59, 999); // End of day
+    toDate.setHours(23, 59, 59, 999);
 
     const result = allOrders.filter((order) => {
       if (!order.createdAt) return false;
@@ -305,26 +336,96 @@ export default function AdminOrderInfo() {
     setFilteredOrder(result);
   };
 
-  console.log("ordesr data", orders);
+  const toggleRowSelection = (id: string) => {
+    setSelectedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleStatusUpdatedLocally = (
+    orderId: string,
+    newStatus: Order["status"],
+  ) => {
+    const updateList = (list: Order[]) =>
+      list.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o));
+
+    setOrders((prev) => updateList(prev));
+    setFilteredOrder((prev) => updateList(prev));
+  };
+
+  const handleBatchStatusChange = async (newStatus: Order["status"]) => {
+    if (selectedRowIds.size === 0) return;
+
+    setIsBatchUpdating(true);
+    const idsToUpdate = Array.from(selectedRowIds);
+
+    try {
+      await Promise.all(
+        idsToUpdate.map((id) =>
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ _id: id, status: newStatus }),
+          }),
+        ),
+      );
+
+      const updateList = (list: Order[]) =>
+        list.map((o) =>
+          selectedRowIds.has(o._id) ? { ...o, status: newStatus } : o,
+        );
+
+      setOrders((prev) => updateList(prev));
+      setFilteredOrder((prev) => updateList(prev));
+      setSelectedRowIds(new Set());
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to update status for selected orders:", err);
+    } finally {
+      setIsBatchUpdating(false);
+    }
+  };
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  const options: Order["status"][] = ["PENDING", "DELIVERED", "CANCELED"];
+
+  // Determines state consistently across SSR and initial render
+  const isButtonDisabled = selectedRowIds.size === 0 || isBatchUpdating;
 
   return (
     <div>
       <div className="p-4 flex justify-between items-center">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold">Orders</h1>
-          <h3 className="text-sm text-gray-500">{orders.length} items</h3>
+          <h3 className="text-sm text-gray-500">
+            {filteredOrders.length} items
+          </h3>
         </div>
         <div className="flex gap-3">
           <Field className="mx-auto w-60">
             <Popover>
               <PopoverTrigger
                 render={
-                  <Button
-                    variant="outline"
+                  <button
+                    type="button"
                     id="date-picker-range"
-                    className="justify-start px-2.5 font-normal"
+                    className="inline-flex h-9 items-center justify-start rounded-md border border-input bg-background px-2.5 text-sm font-normal shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground gap-2"
                   >
-                    <CalendarIcon data-icon="inline-start" />
+                    <CalendarIcon
+                      data-icon="inline-start"
+                      className="h-4 w-4"
+                    />
                     {date?.from ? (
                       date.to ? (
                         <>
@@ -337,10 +438,9 @@ export default function AdminOrderInfo() {
                     ) : (
                       <span>Pick a date</span>
                     )}
-                  </Button>
+                  </button>
                 }
               />
-
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="range"
@@ -352,9 +452,66 @@ export default function AdminOrderInfo() {
               </PopoverContent>
             </Popover>
           </Field>
-          <Button disabled>Change delivery state</Button>
+
+          <Button
+            disabled={isButtonDisabled}
+            onClick={() => setIsDialogOpen(true)}
+            suppressHydrationWarning
+          >
+            Change delivery state{" "}
+            {selectedRowIds.size > 0 ? selectedRowIds.size : null}
+          </Button>
+
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) setSelectedStatus(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Change Delivery State</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-3 py-4">
+                {options.map((status) => {
+                  const isSelected = selectedStatus === status;
+                  return (
+                    <Button
+                      key={status}
+                      variant={isSelected ? "default" : "secondary"}
+                      disabled={isBatchUpdating}
+                      onClick={() => setSelectedStatus(status)}
+                      className={`w-full justify-center font-medium ${
+                        isSelected
+                          ? "border-[#EF4444] text-[#EF4444] bg-[#E11D48]/10"
+                          : ""
+                      }`}
+                    >
+                      {status}
+                    </Button>
+                  );
+                })}
+              </div>
+              <DialogFooter className="w-full flex gap-2">
+                <Button
+                  className="w-full"
+                  disabled={!isMounted || !selectedStatus || isBatchUpdating}
+                  onClick={() => {
+                    if (selectedStatus) {
+                      handleBatchStatusChange(selectedStatus);
+                      setSelectedStatus(null);
+                    }
+                  }}
+                >
+                  {isBatchUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
+
       <div className="flex flex-col">
         {isLoading && (
           <p className="text-sm justify-center flex text-gray-400 py-8">
@@ -363,33 +520,67 @@ export default function AdminOrderInfo() {
         )}
         {error && <p className="text-sm text-red-500 py-4 px-4">{error}</p>}
         {!isLoading && !error && (
-          <DataTable columns={columns} data={filteredOrders} />
+          <DataTable
+            columns={getColumns(
+              currentPage,
+              itemsPerPage,
+              selectedRowIds,
+              toggleRowSelection,
+              handleStatusUpdatedLocally,
+            )}
+            data={paginatedOrders}
+          />
         )}
       </div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              {pageNumber}
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+
+      {totalPages > 1 && (
+        <Pagination className="py-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) setCurrentPage((p) => p - 1);
+                }}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
+              />
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) setCurrentPage((p) => p + 1);
+                }}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }
