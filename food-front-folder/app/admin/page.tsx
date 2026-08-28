@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Truck } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 
-import AdminOrderInfo from "./_components/adminOrderInfo";
+import AdminOrderInfo from "./_components/orders/adminOrderInfo";
 import AdminFoodMenu from "./_components/adminFoodMenu";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -34,7 +34,7 @@ export default function Page() {
             <div className="flex flex-col gap-3">
               <Button
                 variant={"ghost"}
-                onClick={() => handleTabChange('food')}
+                onClick={() => handleTabChange("food")}
                 className={`py-2 px-6 gap-2.5 flex justify-start w-full ${
                   activeTab === "food"
                     ? "bg-black text-white hover:bg-black/90 hover:text-white"

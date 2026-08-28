@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserIcon, ShoppingCart, MapPin, ChevronRight, X } from "lucide-react";
 import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
+import Router from "next/router.js";
 import CartOverlay from "./cartOverlay";
 
 import {
@@ -53,6 +54,14 @@ export default function Header() {
     checkAuth();
   }, []);
 
+  const handleLogout = async () => {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+      method: "POST",
+      credentials: "include", // required so the browser sends the httpOnly cookie to clear
+    });
+    Router.push("/");
+  };
+
   return (
     <>
       <div className="flex w-full justify-between px-22 h-17 bg-[#18181B]">
@@ -95,7 +104,9 @@ export default function Header() {
                   className={"flex flex-col items-center p-4 w-full"}
                 >
                   <h1 className="font-bold text-[20px]">{user.email}</h1>
-                  <Button variant={"ghost"}>Sign out</Button>
+                  <Button variant={"ghost"} onClick={handleLogout}>
+                    Sign out
+                  </Button>
                 </PopoverContent>
               </Popover>
             </>

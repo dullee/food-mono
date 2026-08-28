@@ -2,8 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { UserModel } from "../../models/user-model.js"; // Adjust path to your actual Mongoose User model
 
-const JWT_SECRET =
-  "Z9L85NIwinxKTmWKcH41HbvBcScJEWbtS97u-PiUzyDsCNEoFpnocvp1PU2viSVx";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const loginUser = async (req, res) => {
   try {

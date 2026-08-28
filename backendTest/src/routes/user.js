@@ -6,12 +6,14 @@ import { deleteUser } from "../resolvers/user/delete-user.js";
 import { verifyToken, isAdmin, loginUser } from "../resolvers/user/login.js";
 import { checkEmail } from "../resolvers/user/check-email.js";
 import { UserModel } from "../models/user-model.js";
+import { logoutUser } from "../resolvers/user/logout.js";
 
 export const userRouter = express.Router();
 
 userRouter.post("/", createUser); // This acts as your /signup
 userRouter.post("/login", loginUser); // New login endpoint
 userRouter.post("/check-email", checkEmail);
+userRouter.post("/logout", logoutUser);
 
 // Protected Routes (Requires a valid cookie token)
 userRouter.patch("/", verifyToken, updateUser); // Users can update their own data
