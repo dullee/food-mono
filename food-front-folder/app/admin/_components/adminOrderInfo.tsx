@@ -261,6 +261,9 @@ export default function AdminOrderInfo() {
         if (!res.ok) throw new Error("Failed to fetch orders");
         const data = await res.json();
         setOrders(data);
+
+        // Filter immediately with fetched data
+        filterOrdersByDate(data, date);
       } catch (err) {
         console.error("Database connection error via backend", err);
         setError("Express server is offline.");
@@ -269,20 +272,36 @@ export default function AdminOrderInfo() {
       }
     };
 
-    fetchOrders();
-    if (date?.from && date.to) {
-      filterOrdersByDate();
+    if (orders.length === 0) {
+      fetchOrders();
+    } else {
+      filterOrdersByDate(orders, date);
     }
   }, [date]);
 
-  const filterOrdersByDate = () => {
-    const result = orders.filter((order) => {
-      if (order.createdAt && date?.from && date.to) {
-        const orderDate = new Date(order.createdAt);
-        return orderDate >= date?.from && orderDate <= date.to;
-      }
-      return false;
+  const filterOrdersByDate = (
+    allOrders: Order[],
+    range: DateRange | undefined,
+  ) => {
+    // If no date or no 'from' date is selected, return all orders
+    if (!range || !range.from) {
+      setFilteredOrder(allOrders);
+      return;
+    }
+
+    const fromDate = new Date(range.from);
+    fromDate.setHours(0, 0, 0, 0); // Start of day
+
+    // If 'to' is selected, filter by range; otherwise, filter for just 'from' date
+    const toDate = range.to ? new Date(range.to) : new Date(range.from);
+    toDate.setHours(23, 59, 59, 999); // End of day
+
+    const result = allOrders.filter((order) => {
+      if (!order.createdAt) return false;
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= fromDate && orderDate <= toDate;
     });
+
     setFilteredOrder(result);
   };
 
@@ -297,31 +316,30 @@ export default function AdminOrderInfo() {
         </div>
         <div className="flex gap-3">
           <Field className="mx-auto w-60">
-            <FieldLabel htmlFor="date-picker-range">
-              Date Picker Range
-            </FieldLabel>
             <Popover>
-              <PopoverTrigger>
-                <Button
-                  variant="outline"
-                  id="date-picker-range"
-                  className="justify-start px-2.5 font-normal"
-                >
-                  <CalendarIcon data-icon="inline-start" />
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, "LLL dd, y")} -{" "}
-                        {format(date.to, "LLL dd, y")}
-                      </>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    id="date-picker-range"
+                    className="justify-start px-2.5 font-normal"
+                  >
+                    <CalendarIcon data-icon="inline-start" />
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "LLL dd, y")} -{" "}
+                          {format(date.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(date.from, "LLL dd, y")
+                      )
                     ) : (
-                      format(date.from, "LLL dd, y")
-                    )
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                }
+              />
 
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -334,6 +352,7 @@ export default function AdminOrderInfo() {
               </PopoverContent>
             </Popover>
           </Field>
+          <Button disabled>Change delivery state</Button>
         </div>
       </div>
       <div className="flex flex-col">
