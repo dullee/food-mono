@@ -2,17 +2,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { UserIcon, ShoppingCart, MapPin, ChevronRight, X } from "lucide-react";
+
 import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
-import Router from "next/router.js";
-import CartOverlay from "./cartOverlay";
+import { MapPin, ChevronRight, ShoppingCart } from "lucide-react";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import CartOverlay from "./cartOverlay";
+import ProfileButton from "./profileButton";
 
 interface UserProfile {
   _id: string;
@@ -54,14 +50,6 @@ export default function Header() {
     checkAuth();
   }, []);
 
-  const handleLogout = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
-      method: "POST",
-      credentials: "include", // required so the browser sends the httpOnly cookie to clear
-    });
-    Router.push("/");
-  };
-
   return (
     <>
       <div className="flex w-full justify-between px-22 h-17 bg-[#18181B]">
@@ -92,23 +80,7 @@ export default function Header() {
               >
                 <ShoppingCart size={16} />
               </Button>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button className="w-9 h-9 bg-[#EF4444] rounded-full flex text-white justify-center items-center">
-                      <UserIcon size={16} />
-                    </Button>
-                  }
-                />
-                <PopoverContent
-                  className={"flex flex-col items-center p-4 w-full"}
-                >
-                  <h1 className="font-bold text-[20px]">{user.email}</h1>
-                  <Button variant={"ghost"} onClick={handleLogout}>
-                    Sign out
-                  </Button>
-                </PopoverContent>
-              </Popover>
+              <ProfileButton user={user} />
             </>
           )}
         </div>

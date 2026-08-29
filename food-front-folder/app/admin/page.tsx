@@ -7,8 +7,19 @@ import { Pagination } from "@/components/ui/pagination";
 import AdminOrderInfo from "./_components/orders/adminOrderInfo";
 import AdminFoodMenu from "./_components/adminFoodMenu";
 import { useRouter, useSearchParams } from "next/navigation";
+import ProfileButton from "../_components/profileButton";
+import { useState, useEffect } from "react";
+
+interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function Page() {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "food";
@@ -16,6 +27,34 @@ export default function Page() {
   const handleTabChange = (tabName: string) => {
     router.push(`/admin?tab=${tabName}`);
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // Crucial to send the cookie up
+          },
+        );
+        if (!response.ok) {
+          setUser(null);
+          return;
+        }
+        const data = await response.json();
+
+        setUser(data.user);
+      } catch (err) {
+        console.error("Auth check failed:", err);
+        setUser(null); // Clear state if token is missing or expired
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#F4F4F5] justify-center w-full">
@@ -63,9 +102,7 @@ export default function Page() {
 
         <div className="py-6 w-full flex flex-col gap-6 min-w-0">
           <div className="flex justify-end w-full">
-            <div className="border border-black w-9 h-9 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-100">
-              ?
-            </div>
+            {!loading && user && <ProfileButton user={user} />}
           </div>
 
           <div className="flex-1">
