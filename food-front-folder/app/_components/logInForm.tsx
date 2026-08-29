@@ -12,11 +12,13 @@ export default function LogInForm() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
 
-  const [resetPassword, SetResetPassword] = useState<boolean>(false);
+  const [resetPassword, setResetPassword] = useState<boolean>(false);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="w-full max-w-md mx-auto ">
-      {!resetPassword && (
+      {!resetPassword && !showResetForm && (
         <Formik
           initialValues={{ email: userEmail, password: "" }}
           validationSchema={Yup.object({
@@ -84,13 +86,11 @@ export default function LogInForm() {
                   component="span"
                   className="text-red-500 text-xs"
                 />
-                <div>
-                  <Button
-                    onClick={() => SetResetPassword(true)}
-                    className={"underline bg-0 p-0 text-black"}
-                  >
-                    Forgot Password?
-                  </Button>
+                <div
+                  onClick={() => setResetPassword(true)}
+                  className={"underline text-black hover:bg-none"}
+                >
+                  Forgot Password?
                 </div>
               </div>
 
@@ -108,6 +108,7 @@ export default function LogInForm() {
       {resetPassword && (
         <Formik
           initialValues={{ email: userEmail }}
+          enableReinitialize
           validationSchema={Yup.object({
             email: Yup.string()
               .email("Invalid email format")
@@ -115,13 +116,22 @@ export default function LogInForm() {
           })}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/check-email`, {
-                email: values.email,
-              });
+              const res = await axios.patch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/check-email`,
+                {
+                  email: values.email,
+                },
+              );
+              if (!res.data.emailTaken) {
+                setFieldError("email", "Email is not connected to account");
+                return;
+              }
+
+              setUserEmail(values.email);
+              setShowResetForm(true);
+              setResetPassword(false);
             } catch (error: any) {
-              const errorMsg =
-                error.response?.data?.error ||
-                "Email already registered or server error.";
+              const errorMsg = error.response?.data?.error || "Server error.";
               setFieldError("email", errorMsg);
             } finally {
               setSubmitting(false);
@@ -147,6 +157,94 @@ export default function LogInForm() {
                   component="span"
                   className="text-red-500 text-xs"
                 />
+              </div>
+              <Button
+                type="submit"
+                disabled={!isValid || !dirty || isSubmitting}
+                className="bg-black text-white py-2 rounded-md"
+              >
+                {isSubmitting ? "Checking..." : "Continue"}
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      )}
+      {showResetForm && (
+        <Formik
+          initialValues={{ newPassword: "", confirmPassword: "" }}
+          validationSchema={Yup.object({
+            newPassword: Yup.string()
+              .min(6, "Password must be at least 6 characters")
+              .required("New password is required"),
+            confirmPassword: Yup.string()
+              .oneOf([Yup.ref("newPassword")], "Passwords must match")
+              .required("Confirm password is required"),
+          })}
+          onSubmit={async (values, { setSubmitting, setFieldError }) => {
+            try {
+              await axios.patch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/change-password`,
+                {
+                  email: userEmail,
+                  newPassword: values.newPassword,
+                },
+              );
+
+              setShowResetForm(false);
+              setResetPassword(false);
+            } catch (error: any) {
+              const errorMsg = error.response?.data?.error || "server error.";
+              setFieldError("confirmPassword", errorMsg);
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({ isValid, dirty, isSubmitting }) => (
+            <Form className="flex flex-col gap-4 ">
+              <h2 className="text-xl font-bold">Create new password</h2>
+              <p className="text-sm text-gray-600">
+                Set a new password with a combination of letters and numbers for
+                better security.
+              </p>
+              <div className="flex flex-col gap-1">
+                <Field
+                  name="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="border px-3 py-2 rounded-md"
+                />
+                <ErrorMessage
+                  name="newPassword"
+                  component="span"
+                  className="text-red-500 text-xs"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="relative flex items-center">
+                  <Field
+                    name="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm "
+                    className="border px-3 py-2 pr-10 rounded-md w-full"
+                  />
+                </div>
+                <ErrorMessage
+                  name="confirmPassword"
+                  component="span"
+                  className="text-red-500 text-xs"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={`w-3.5 rounded-md ${showPassword && "bg-black text-white"} text-gray-500 hover:text-gray-700`}
+                  >
+                    {showPassword && <Check size={14} />}
+                  </Button>
+                  <span>Show password</span>
+                </div>
               </div>
               <Button
                 type="submit"
