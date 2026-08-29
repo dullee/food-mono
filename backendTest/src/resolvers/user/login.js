@@ -1,8 +1,7 @@
+import "dotenv/config";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { UserModel } from "../../models/user-model.js"; // Adjust path to your actual Mongoose User model
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export const loginUser = async (req, res) => {
   try {
@@ -21,9 +20,13 @@ export const loginUser = async (req, res) => {
     }
 
     // 3. Generate the token payload
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
 
     // 4. Place token inside a secure browser cookie
     res.cookie("token", token, {
@@ -50,7 +53,7 @@ export const verifyToken = (req, res, next) => {
   }
 
   try {
-    const verified = jwt.verify(token, JWT_SECRET);
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
     req.user = verified; // This injects { id, role } into the request object
     next(); // Pass control to the next check
   } catch (err) {
