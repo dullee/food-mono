@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button";
 
 import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
-import { MapPin, ChevronRight, ShoppingCart } from "lucide-react";
+import { ChevronRight, ShoppingCart } from "lucide-react";
 
 import CartOverlay from "./cartOverlay";
 import ProfileButton from "./profileButton";
+import AddressButton from "./addressButton";
 
 interface UserProfile {
   _id: string;
   name: string;
   email: string;
+  address: string;
   role: string;
 }
 export default function Header() {
@@ -67,12 +69,7 @@ export default function Header() {
           )}
           {user && (
             <>
-              <div className=" h-9 bg-[#F4F4F5] rounded-full flex text-xs gap-1 px-3 py-2 text-[#EF4444] justify-center items-center">
-                <MapPin size={16} />
-                <span>Delivery address:</span>
-                <span className="text-[#71717A]">Add location</span>
-                <ChevronRight size={16} className="text-[#71717A]" />
-              </div>
+              <AddressButton address={user.address} />
               <Button
                 variant={"outline"}
                 onClick={() => setShowCart(true)}

@@ -18,7 +18,9 @@ userRouter.post("/logout", logoutUser);
 // Protected Routes (Requires a valid cookie token)
 userRouter.patch("/", verifyToken, updateUser); // Users can update their own data
 userRouter.get("/me", verifyToken, async (req, res) => {
-  const user = await UserModel.findById(req.user.id).select("name email role");
+  const user = await UserModel.findById(req.user.id).select(
+    "name email role address",
+  );
   res.json({ authenticated: true, user });
 });
 
