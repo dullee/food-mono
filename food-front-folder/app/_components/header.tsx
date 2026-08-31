@@ -55,7 +55,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex w-full justify-between px-22 h-17 bg-[#18181B]">
+      <div className="fixed flex max-w-360 w-full justify-between px-22 h-17 bg-[#18181B] z-50">
         <Image src={logoImg} alt="logo" width={146} height={44} />
         <div className="flex gap-3 items-center">
           {!user && (
