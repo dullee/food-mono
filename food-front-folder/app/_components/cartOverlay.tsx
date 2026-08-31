@@ -1,11 +1,11 @@
 "use client";
 
-import { X, ShoppingCart, Minus, Plus, Soup } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus, Soup, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Order } from "../types/order";
-import Image from "next/image.js";
-import { Food } from "../types/food.js";
+import Image from "next/image";
+import { Food } from "../types/food";
 
 type CartOverlayProps = {
   onClose: () => void;
@@ -17,43 +17,15 @@ interface CartItem {
   quantity: number;
 }
 
+const CART_KEY = "food_cart";
+
 export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
   const [activeCartButton, setActiveCartButton] = useState<string>("cart");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[] | null>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!userId || userId === "undefined")
-      return console.log("cart overlay has no userId");
-    const fetchOrders = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/order/${userId}`,
-          {
-            credentials: "include", // Sends auth cookie automatically
-          },
-        );
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        setOrders(data.orders);
-        console.log(data);
-      } catch (err) {
-        console.error("Failed to load orders:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    setCartItems(getCart());
-
-    fetchOrders();
-  }, [userId]);
-
-  const CART_KEY = "food_cart";
-
+  // Helper to read localStorage safely
   const getCart = (): CartItem[] => {
     if (typeof window === "undefined") return [];
     try {
@@ -64,35 +36,39 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
       return [];
     }
   };
-
-  const createOrder = async () => {
-    if (!userId) {
-      alert("Please log in to add items to your cart.");
-      return;
-    }
+  const fetchOrders = async () => {
     try {
-      const payload = {
-        user: userId,
-        foodOrderItems: cartItems.map((item) => ({
-          food: item.food._id,
-          quantity: item.quantity,
-        })),
-      };
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/order/${userId}`,
 
-      console.log("Food added successfully!");
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.error || error.message || "Unknown error";
-      console.log("Error:", errorMsg);
+        { method: "GET", credentials: "include" },
+      );
+
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+      const data = await res.json();
+      setOrders(data.orders || []);
+      console.log("order data", data);
+    } catch (err) {
+      console.error("Failed to load orders:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // 1. Sync local storage cart state on mount
+    setCartItems(getCart());
+
+    if (!userId || userId === "undefined") {
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch order history
+
+    fetchOrders();
+  }, [userId]);
 
   const updateCartQuantity = (
     foodId: string,
@@ -101,7 +77,6 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
     let currentCart = getCart();
 
     if (newQuantity <= 0) {
-      // Remove item if quantity drops to 0
       currentCart = currentCart.filter((item) => item.food._id !== foodId);
     } else {
       currentCart = currentCart.map((item) =>
@@ -114,14 +89,54 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
   };
 
   const handleQuantityChange = (foodId: string, newQuantity: number) => {
-    // 1. Update localStorage and get the fresh array
     const updatedCart = updateCartQuantity(foodId, newQuantity);
-
-    // 2. Update React state to trigger a redraw!
     setCartItems(updatedCart);
   };
 
-  const currentOrder = Array.isArray(orders) ? orders[orders.length - 1] : null;
+  const removeCartItem = (foodId: string) => {
+    const updatedCart = updateCartQuantity(foodId, 0);
+    setCartItems(updatedCart);
+  };
+
+  const createOrder = async () => {
+    if (!userId) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
+
+    if (cartItems.length === 0) return;
+
+    try {
+      const payload = {
+        user: userId,
+        foodOrderItems: cartItems.map((item) => ({
+          food: item.food._id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to place order");
+
+      // Clear local storage cart on success
+      localStorage.removeItem(CART_KEY);
+      setCartItems([]);
+      await fetchOrders();
+      setActiveCartButton("order");
+    } catch (error: any) {
+      console.error("Error creating order:", error.message || error);
+    }
+  };
+
+  const currentOrder =
+    Array.isArray(orders) && orders.length > 0
+      ? orders[orders.length - 1]
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30 text-white w-screen h-screen">
@@ -133,13 +148,14 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
           </div>
 
           <Button
-            variant={"outline"}
+            variant="outline"
             onClick={onClose}
             className="bg-[#404040] w-9 h-9"
           >
             <X size={16} />
           </Button>
         </div>
+
         <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-white">
           <Button
             onClick={() => setActiveCartButton("cart")}
@@ -154,108 +170,160 @@ export default function CartOverlay({ onClose, userId }: CartOverlayProps) {
             Order
           </Button>
         </div>
-        <div className="bg-white rounded-2xl font-bold text-xl h-full p-4 flex flex-col gap-5 text-[#71717A]">
+
+        <div className="bg-white rounded-2xl font-bold text-xl h-full p-4 flex flex-col gap-5 text-[#71717A] overflow-y-auto">
           <div className="flex flex-col gap-5">
             <h2>{activeCartButton === "cart" ? "My cart" : "Order history"}</h2>
+
             {!loading && activeCartButton === "cart" && (
               <>
-                {cartItems?.map((order, index) => (
-                  <div key={index} className="flex gap-2.5">
-                    <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
-                      <Image
-                        src={order.food.image}
-                        alt={order.food.foodName}
-                        className="object-cover"
-                        fill
-                      />
-                    </div>
-                    <div className="flex flex-col justify-between max-w-76.25 w-full">
-                      <div className="flex justify-between  w-full">
-                        <div className="flex flex-col ">
-                          <h1 className="text-base text-[#EF4444]">
-                            {order.food.foodName}
-                          </h1>
+                {cartItems.length === 0 ? (
+                  <div className="bg-[#F4F4F5] flex flex-col px-8 py-12 justify-center items-center gap-1">
+                    <Image
+                      width={61}
+                      height={50}
+                      alt="logo"
+                      src={"./logoWithoutText.svg"}
+                    />
+                    <h1 className="text-black">Your cart is empty</h1>
+                    <p className="text-sm font-normal text-center py-4">
+                      Hungry? 🍔 Add some delicious dishes to your cart and
+                      satisfy your cravings!
+                    </p>
+                  </div>
+                ) : (
+                  cartItems.map((item) => (
+                    <div key={item.food._id} className="flex gap-2.5">
+                      <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
+                        <Image
+                          src={item.food.image}
+                          alt={item.food.foodName}
+                          className="object-cover"
+                          fill
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between max-w-76.25 w-full">
+                        <div className="flex justify-between w-full">
+                          <div className="flex flex-col">
+                            <h1 className="text-base text-[#EF4444]">
+                              {item.food.foodName}
+                            </h1>
+                            <p className="text-xs font-normal text-black line-clamp-2">
+                              {item.food.ingredients}
+                            </p>
+                          </div>
 
-                          <p className="text-xs font-normal text-black">
-                            {order.food.ingredients}
+                          <Button
+                            variant="outline"
+                            onClick={() => removeCartItem(item.food._id)}
+                            className="border border-red-500 text-red-500 w-9 h-9"
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+
+                        <div className="flex justify-between text-black">
+                          <div className="flex gap-3 items-center">
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.food._id,
+                                  item.quantity - 1,
+                                )
+                              }
+                              variant="ghost"
+                              className="p-2.5"
+                            >
+                              <Minus size={16} />
+                            </Button>
+                            <p className="text-sm">{item.quantity}</p>
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.food._id,
+                                  item.quantity + 1,
+                                )
+                              }
+                              variant="ghost"
+                              className="p-2.5"
+                            >
+                              <Plus size={16} />
+                            </Button>
+                          </div>
+                          <p className="text-base font-bold">
+                            ${item.food.price}
                           </p>
                         </div>
-
-                        <Button
-                          variant={"outline"}
-                          className={
-                            "border border-red-500 text-red-500 w-9 h-9"
-                          }
-                        >
-                          <X />
-                        </Button>
-                      </div>
-
-                      <div className="flex justify-between text-black">
-                        <div className="flex gap-3 items-center ">
-                          <Button
-                            onClick={() =>
-                              handleQuantityChange(
-                                order.food._id,
-                                order.quantity - 1,
-                              )
-                            }
-                            variant={"ghost"}
-                            className="p-2.5 "
-                          >
-                            <Minus size={16} />
-                          </Button>
-                          <p>{order.quantity}</p>
-                          <Button
-                            onClick={() =>
-                              handleQuantityChange(
-                                order.food._id,
-                                order.quantity + 1,
-                              )
-                            }
-                            variant={"ghost"}
-                            className="p-2.5 "
-                          >
-                            <Plus size={16} />
-                          </Button>
-                        </div>
-                        <p>${order.food.price}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
-                <Button variant={"outline"} onClick={createOrder}>
-                  Checkout
-                </Button>
+                  ))
+                )}
+                {cartItems.length > 0 && (
+                  <Button variant="outline" onClick={createOrder}>
+                    Checkout
+                  </Button>
+                )}
               </>
             )}
+
             {!loading && activeCartButton === "order" && (
               <div>
-                <div className="flex flex-col gap-3 px-3">
-                  <div className="flex justify-between">
-                    <h1 className="text-black text-base">
-                      ${currentOrder?.totalPrice}
-                    </h1>
-
-                    <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black">
-                      {currentOrder?.status}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 text-xs font-medium">
-                    {currentOrder?.foodOrderItems.map((food, index) => (
-                      <div key={index} className="flex justify-between">
-                        <div className="flex gap-2">
-                          <Soup size={16} />
-                          <p> {food.food.foodName} </p>
+                {orders ? (
+                  orders?.map((order) => (
+                    <div key={order._id} className="flex flex-col gap-3 px-3">
+                      <div className="flex justify-between items-center">
+                        <h1 className="text-black text-base">
+                          ${order.totalPrice}
+                        </h1>
+                        <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black capitalize">
+                          {order.status}
                         </div>
-
-                        <p className="text-black"> x {food.quantity}</p>
                       </div>
-                    ))}
-                    <p>{currentOrder?.updatedAt}</p>
+
+                      <div className="flex flex-col gap-3 text-xs font-medium">
+                        {order.foodOrderItems.map((foodItem) => (
+                          <div
+                            key={foodItem.food._id}
+                            className="flex justify-between text-[#71717A]"
+                          >
+                            <div className="flex gap-2">
+                              <Soup size={16} />
+                              <p>{foodItem.food.foodName}</p>
+                            </div>
+                            <p className="text-black">x {foodItem.quantity}</p>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Timer size={16} />
+                          <p>
+                            {order?.createdAt?.replace(
+                              /^(\d{4})-(\d{2})-(\d{2}).*/,
+                              "$1/$2/$3",
+                            )}
+                          </p>
+                        </div>
+                        <p className="overflow-y-clip max-h-4">
+                          {order.user.address}
+                        </p>
+                      </div>
+                      <div className="border-b-2 border-dashed border-gray-400 my-4" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="bg-[#F4F4F5] flex flex-col px-8 py-12 justify-center items-center gap-1">
+                    <Image
+                      width={61}
+                      height={50}
+                      alt="logo"
+                      src={"./logoWithoutText.svg"}
+                    />
+                    <h1 className="text-black">No Orders Yet?</h1>
+                    <p className="text-sm font-normal text-center py-4">
+                      🍕 "You haven't placed any orders yet. Start exploring our
+                      menu and satisfy your cravings!"
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>

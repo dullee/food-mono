@@ -39,6 +39,7 @@ export default function Header() {
           return;
         }
         const data = await response.json();
+        console.log("user data ", data);
 
         setUser(data.user);
       } catch (err) {
@@ -69,7 +70,7 @@ export default function Header() {
           )}
           {user && (
             <>
-              <AddressButton address={user.address} />
+              <AddressButton address={user.address} _id={user._id} />
               <Button
                 variant={"outline"}
                 onClick={() => setShowCart(true)}
