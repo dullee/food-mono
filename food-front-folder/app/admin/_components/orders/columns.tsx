@@ -82,7 +82,7 @@ export const getColumns = (
     accessorKey: "user.address",
     header: "Delivery Address",
     cell: ({ row }) => (
-      <span className="text-gray-600 max-w-55 truncate block">
+      <span className="text-[#71717A] text-xs max-w-55 truncate block">
         {row.original.user?.address || "No address provided"}
       </span>
     ),

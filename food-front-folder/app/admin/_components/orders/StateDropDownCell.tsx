@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,23 +54,41 @@ export function StateDropdownCell({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isUpdating}
-        className={`h-7 px-2.5 rounded-full text-xs font-medium border flex items-center gap-1 transition-colors ${
+        className={`h-7 px-2.5 rounded-full text-xs font-semibold text-black border flex items-center gap-2.5 transition-colors ${
           STATE_STYLES[initialState] || "bg-gray-100 text-gray-800"
         }`}
       >
-        {isUpdating ? "Updating..." : initialState}
-        <ChevronDown className="h-3 w-3 opacity-60" />
+        {isUpdating
+          ? "Updating..."
+          : initialState.charAt(0) + initialState.slice(1).toLowerCase()}
+
+        <ChevronsUpDown size={16} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {STATUS_OPTIONS.map((opt) => (
-          <DropdownMenuItem
-            key={opt}
-            onClick={() => handleStatusChange(opt)}
-            className="text-xs font-medium cursor-pointer"
-          >
-            {opt}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent
+        align="start"
+        className={"flex flex-col w-36 px-1 py-3 gap-4 text-xs rounded-md "}
+      >
+        <Button
+          onClick={() => handleStatusChange("DELIVERED")}
+          variant={"secondary"}
+          className={"w-18.75 h-5 ml-2 text-xs"}
+        >
+          Delivered
+        </Button>
+        <Button
+          onClick={() => handleStatusChange("PENDING")}
+          variant={"secondary"}
+          className={"w-18.75 h-5 ml-2 text-xs"}
+        >
+          Pending
+        </Button>
+        <Button
+          onClick={() => handleStatusChange("CANCELLED")}
+          variant={"secondary"}
+          className={"w-18.75 h-5 ml-2 text-xs"}
+        >
+          Cancelled
+        </Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
