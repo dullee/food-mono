@@ -48,6 +48,7 @@ export const createOrder = async (req, res) => {
     const newOrder = await OrderModel.create({
       user: userId,
       totalPrice: totalPrice,
+      address: req.body.address,
       foodOrderItems: orderItems,
     });
 

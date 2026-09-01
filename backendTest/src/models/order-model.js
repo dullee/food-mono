@@ -26,6 +26,7 @@ const OrderSchema = new Schema(
     totalPrice: {
       type: Number,
     },
+    address: { type: String, required: true },
     foodOrderItems: [foodOrderItems],
     status: {
       type: String,

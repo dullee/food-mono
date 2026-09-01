@@ -23,33 +23,33 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include", // Crucial to send the cookie up
-          },
-        );
-        if (!response.ok) {
-          setUser(null);
-          return;
-        }
-        const data = await response.json();
-        console.log("user data ", data);
-
-        setUser(data.user);
-      } catch (err) {
-        console.error("Auth check failed:", err);
-        setUser(null); // Clear state if token is missing or expired
-      } finally {
-        setLoading(false);
+  const checkAuth = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // Crucial to send the cookie up
+        },
+      );
+      if (!response.ok) {
+        setUser(null);
+        return;
       }
-    };
+      const data = await response.json();
+      console.log("user data ", data);
 
+      setUser(data.user);
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      setUser(null); // Clear state if token is missing or expired
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     checkAuth();
   }, []);
 
@@ -70,7 +70,7 @@ export default function Header() {
           )}
           {user && (
             <>
-              <AddressButton address={user.address} _id={user._id} />
+              <AddressButton address={user.address} _id={user._id} onAddressUpdated={checkAuth} />
               <Button
                 variant={"outline"}
                 onClick={() => setShowCart(true)}
@@ -84,7 +84,7 @@ export default function Header() {
         </div>
       </div>
       {showCart && !loading && (
-        <CartOverlay onClose={() => setShowCart(false)} userId={user?._id} />
+        <CartOverlay onClose={() => setShowCart(false)} userObj={user} />
       )}
     </>
   );

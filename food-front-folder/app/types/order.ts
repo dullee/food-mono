@@ -8,6 +8,7 @@ export type FoodOrderItemsProps = {
 export type Order = {
   _id: string;
   user: User;
+  address: string,
   totalPrice: number;
   foodOrderItems: FoodOrderItemsProps[];
   status: string;

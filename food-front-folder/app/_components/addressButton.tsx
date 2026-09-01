@@ -15,9 +15,14 @@ import { Textarea } from "@/components/ui/textarea";
 type Props = {
   address: string;
   _id: string;
+  onAddressUpdated: () => void;
 };
 
-export default function AddressButton({ address, _id }: Props) {
+export default function AddressButton({
+  address,
+  _id,
+  onAddressUpdated,
+}: Props) {
   const [addressInput, setAddressInput] = useState(address || "");
   const [savedAddress, setSavedAddress] = useState(address);
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +47,7 @@ export default function AddressButton({ address, _id }: Props) {
         throw new Error("Failed to update address");
       }
       setSavedAddress(addressInput);
+      onAddressUpdated()
     } catch (error) {
       console.error("Error updating address:", error);
     } finally {
