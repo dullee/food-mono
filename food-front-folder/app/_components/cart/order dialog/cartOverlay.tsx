@@ -1,20 +1,14 @@
 "use client";
 
-import { X, ShoppingCart, Minus, Plus, Soup, Timer } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Order } from "../types/order";
+import { Order } from "../../../types/order";
 import Image from "next/image";
-import { Food } from "../types/food";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Food } from "../../../types/food";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import OrderElement from "./orderElement";
+import OrderPlacedDialog from "./orderPlacedDialog";
 
 type CartOverlayProps = {
   onClose: () => void;
@@ -161,36 +155,10 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
   return (
     <>
       {/* 1. ORDER PLACED SUCCESS DIALOG */}
-      <Dialog open={placedOrder} onOpenChange={setPlacedOrder}>
-        <DialogContent className="flex flex-col justify-center gap-6 w-full max-w-md items-center p-6 sm:rounded-2xl">
-          <DialogHeader className="items-center text-center">
-            <DialogTitle className="text-2xl font-bold">
-              Your order has been successfully placed!
-            </DialogTitle>
-          </DialogHeader>
-          <Image
-            src="/orderPlaced.svg"
-            width={156}
-            height={265}
-            alt="order placed"
-          />
-          <DialogFooter className="w-full sm:justify-center">
-            <DialogClose
-              render={
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => setPlacedOrder(false)}
-                  className="w-full"
-                >
-                  Back to Home
-                </Button>
-              }
-            />
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      <OrderPlacedDialog
+        placedOrder={placedOrder}
+        setPlacedOrder={setPlacedOrder}
+      />
       {/* 2. CART & ORDER HISTORY SIDEBAR DIALOG */}
       <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="fixed right-0 top-0 left-auto translate-x-0 translate-y-0 h-full w-full max-w-133.75 bg-[#404040] p-8 gap-6 flex flex-col rounded-l-2xl rounded-r-none border-none shadow-xl [&>button:last-child]:hidden outline-none">
@@ -334,13 +302,13 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
                           </div>
                         ),
                       )}
-                      <div className="flex flex-col gap-2 pt-2">
-                        <h1 className="text-sm text-black font-semibold">
+                      <div className="flex flex-col gap-2 pt-2 text-[#71717A]">
+                        <h1 className="text-sm font-semibold">
                           Delivery location
                         </h1>
-                        <input
-                          className="border border-gray-300 rounded-lg p-2 text-sm text-black font-normal outline-none focus:border-red-500"
-                          type="text"
+                        <textarea
+                          placeholder="Please share your complete address"
+                          className="border border-gray-300 rounded-lg h-20 p-2 text-sm font-normal outline-none focus:border-red-500"
                           value={deliveryAddress}
                           onChange={(e) => updateAdress(e.target.value)}
                         />
@@ -381,70 +349,7 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
             )}
 
             {!loading && activeCartButton === "order" && (
-              <div className="flex-1 overflow-y-auto bg-white rounded-2xl p-4">
-                <h2 className="text-black">Order history</h2>
-                {orders && orders.length > 0 ? (
-                  orders.map((order: any, index: number, array: any[]) => (
-                    <div
-                      key={order._id}
-                      className="flex flex-col gap-3 px-3 mt-4"
-                    >
-                      <div className="flex justify-between items-center">
-                        <h1 className="text-black text-base">
-                          ${order.totalPrice}
-                        </h1>
-                        <div className="flex rounded-full border px-2.5 py-1.5 text-xs text-black capitalize">
-                          {order.status}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 text-xs font-medium">
-                        {order.foodOrderItems.map((foodItem: any) => (
-                          <div
-                            key={foodItem.food._id}
-                            className="flex justify-between text-[#71717A]"
-                          >
-                            <div className="flex gap-2">
-                              <Soup size={16} />
-                              <p>{foodItem.food.foodName}</p>
-                            </div>
-                            <p className="text-black">x {foodItem.quantity}</p>
-                          </div>
-                        ))}
-                        <div className="flex gap-2 text-[#71717A]">
-                          <Timer size={16} />
-                          <p>
-                            {order?.createdAt?.replace(
-                              /^(\d{4})-(\d{2})-(\d{2}).*/,
-                              "$1/$2/$3",
-                            )}
-                          </p>
-                        </div>
-                        <p className="overflow-y-clip max-h-4 text-[#71717A]">
-                          {order.address}
-                        </p>
-                      </div>
-                      {index !== array.length - 1 && (
-                        <div className="border-b-2 border-dashed border-gray-400 mb-5" />
-                      )}
-                      </div>
-                  ))
-                ) : (
-                  <div className="bg-[#F4F4F5] flex flex-col px-8 py-12 justify-center items-center gap-1 mt-4 rounded-xl">
-                    <Image
-                      width={61}
-                      height={50}
-                      alt="logo"
-                      src="/logoWithoutText.svg"
-                    />
-                    <h1 className="text-black">No Orders Yet?</h1>
-                    <p className="text-sm font-normal text-center py-4">
-                      🍕 You haven't placed any orders yet. Start exploring our
-                      menu and satisfy your cravings!
-                    </p>
-                  </div>
-                )}
-              </div>
+              <OrderElement orders={orders} />
             )}
           </div>
         </DialogContent>

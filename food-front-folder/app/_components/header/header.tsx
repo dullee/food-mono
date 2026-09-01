@@ -7,7 +7,7 @@ import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
 import { ChevronRight, ShoppingCart } from "lucide-react";
 
-import CartOverlay from "./cartOverlay";
+import CartOverlay from "../cart/order dialog/cartOverlay";
 import ProfileButton from "./profileButton";
 import AddressButton from "./addressButton";
 
@@ -70,7 +70,11 @@ export default function Header() {
           )}
           {user && (
             <>
-              <AddressButton address={user.address} _id={user._id} onAddressUpdated={checkAuth} />
+              <AddressButton
+                address={user.address}
+                _id={user._id}
+                onAddressUpdated={checkAuth}
+              />
               <Button
                 variant={"outline"}
                 onClick={() => setShowCart(true)}

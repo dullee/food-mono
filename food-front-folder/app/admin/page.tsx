@@ -7,7 +7,7 @@ import { Pagination } from "@/components/ui/pagination";
 import AdminOrderInfo from "./_components/orders/adminOrderInfo";
 import AdminFoodMenu from "./_components/adminFoodMenu";
 import { useRouter, useSearchParams } from "next/navigation";
-import ProfileButton from "../_components/profileButton";
+import ProfileButton from "../_components/header/profileButton";
 import { useState, useEffect } from "react";
 
 interface UserProfile {

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Header from "./_components/header";
+import Header from "./_components/header/header";
 import FoodMenu from "./_components/foodMenu";
 import Footer from "./_components/footer";
 

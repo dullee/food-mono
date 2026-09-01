@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import bikeImg from "@/public/deliveryBike.jpg";
 import BackButton from "../_components/backButton";
-import MultiStepSignup from "../_components/multiStepSignUp";
+import MultiStepSignup from "./multiStepSignUp";
 
 export default function SignUp() {
   return (

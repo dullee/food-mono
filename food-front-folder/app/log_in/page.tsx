@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import bikeImg from "@/public/deliveryBike.jpg";
 import BackButton from "../_components/backButton";
-import LogInForm from "../_components/logInForm";
+import LogInForm from "./logInForm";
 
 export default function Page() {
   return (
