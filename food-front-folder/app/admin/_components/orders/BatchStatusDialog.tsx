@@ -45,7 +45,7 @@ export function BatchStatusDialog({
             return (
               <Button
                 key={status}
-                variant={isSelected ? "default" : "secondary"}
+                variant={"secondary"}
                 disabled={isSaving}
                 onClick={() => setSelectedStatus(status)}
                 className={`w-full justify-center font-medium ${

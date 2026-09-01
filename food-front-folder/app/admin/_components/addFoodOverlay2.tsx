@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Image } from "lucide-react";
+import { X, Image, Check } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -66,6 +67,14 @@ export default function AddFoodOverlay2({
     return data;
   };
 
+  function triggerAlert() {
+    toast("New dish is being added to the menu", {
+      position: "top-center",
+      className: "!bg-black !text-white !text-base !p-4 !gap-3 !w-full",
+      icon: <Check size={16} />,
+    });
+  }
+
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!foodName.trim()) return;
@@ -74,6 +83,7 @@ export default function AddFoodOverlay2({
     try {
       await addFood();
       await onRefresh();
+      triggerAlert();
       onClose();
     } catch (err: any) {
       alert(`Error adding dish: ${err.message}`);

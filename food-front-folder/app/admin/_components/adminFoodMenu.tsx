@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Check } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import Categories from "./categories";

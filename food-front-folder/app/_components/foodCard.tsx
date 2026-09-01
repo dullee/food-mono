@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Check, X } from "lucide-react";
@@ -32,7 +27,7 @@ export default function FoodCard({ food }: FoodProps) {
   function triggerAlert() {
     toast("Food is being added to the cart!", {
       position: "top-center",
-      className: "!bg-black !text-white !text-xl !p-4",
+      className: "!bg-black !text-white !text-base !p-4",
       icon: <Check size={16} />,
     });
   }

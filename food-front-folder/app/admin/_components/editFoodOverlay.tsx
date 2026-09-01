@@ -86,10 +86,13 @@ export default function EditFoodOverlay({
   };
 
   const deleteFood = async (_id: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/food/${_id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/food/${_id}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Failed to delete food");
@@ -210,7 +213,7 @@ export default function EditFoodOverlay({
         onClick={onClose}
         className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm transition-opacity"
       />
-      <div className="relative z-10 w-full max-w-md transform rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl transition-all">
+      <div className="relative z-10 w-118 transform rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl transition-all">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">
             Edit {food.foodName}
@@ -226,7 +229,7 @@ export default function EditFoodOverlay({
 
         <form onSubmit={handleEditChanges} className="space-y-4">
           <div className="space-y-3">
-            <div>
+            <div className="flex">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                 Dish Name
               </label>
@@ -240,7 +243,7 @@ export default function EditFoodOverlay({
               />
             </div>
 
-            <div>
+            <div className="flex justify-between">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                 Dish Category
               </label>
@@ -269,21 +272,7 @@ export default function EditFoodOverlay({
               </Select>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Food Price ($)
-              </label>
-              <input
-                type="number"
-                value={foodPrice}
-                onChange={(e) => setFoodPrice(Number(e.target.value))}
-                disabled={isSaving}
-                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
-                required
-              />
-            </div>
-
-            <div>
+            <div className="flex justify-between">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                 Ingredients
               </label>
@@ -296,29 +285,43 @@ export default function EditFoodOverlay({
                 required
               />
             </div>
+
+            <div className="flex justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                Food Price ($)
+              </label>
+              <input
+                type="number"
+                value={foodPrice}
+                onChange={(e) => setFoodPrice(Number(e.target.value))}
+                disabled={isSaving}
+                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                required
+              />
+            </div>
           </div>
-          <div>
+          <div className="flex justify-between">
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleLogoUpload}
               accept="image/*"
               className="hidden"
-            />
+            />{" "}
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
+              Image
+            </p>
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDragDrop}
               onClick={triggerFileSelect}
-              className={`relative h-32 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition ${
+              className={`relative w-[288px] h-29 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition ${
                 dragOverUpload
                   ? "border-blue-500 bg-blue-50/50 scale-[0.98]"
                   : "border-gray-300 bg-blue-600/5 hover:border-gray-400 hover:bg-gray-50"
               }`}
             >
-              {/* <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
-              Image
-            </p> */}
               <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
                 {uploading ? (
                   <span className="text-xs text-gray-500 animate-pulse">

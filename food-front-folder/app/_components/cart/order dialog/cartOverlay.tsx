@@ -234,7 +234,7 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
                             <div className="flex gap-2.5">
                               <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
                                 <Image
-                                  src={item.food.image}
+                                  src={item.food.image || "/finger-food.jpg"}
                                   alt={item.food.foodName}
                                   className="object-cover"
                                   fill
