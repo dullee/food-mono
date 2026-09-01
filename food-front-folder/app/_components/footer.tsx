@@ -10,7 +10,9 @@ export default function Footer() {
       <div className="w-full bg-[#EF4444]  md:h-23"></div>
       <div className="flex flex-col w-full max-w-360 md:px-22 md:pt-19">
         <div className="flex flex-row md:gap-55 md:pb-26">
-          <Image alt="logo" src={logo} />
+          <div className="w-22 h-23.25 relative">
+            <Image alt="logo" src={logo} fill />
+          </div>
           <div className="flex  md:gap-28 flex-row">
             <div className="flex flex-col gap-4">
               <p className="text-[#71717A]">NOMNOM</p>

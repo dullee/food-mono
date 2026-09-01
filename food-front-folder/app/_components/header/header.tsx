@@ -3,9 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-import logoImg from "@/public/logoH.svg";
 import { useEffect, useState } from "react";
-import { ChevronRight, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 import CartOverlay from "../cart/order dialog/cartOverlay";
 import ProfileButton from "./profileButton";
@@ -38,7 +37,6 @@ export default function Header() {
         return;
       }
       const data = await response.json();
-      console.log("user data ", data);
 
       setUser(data.user);
     } catch (err) {
@@ -56,7 +54,7 @@ export default function Header() {
   return (
     <>
       <div className="fixed flex max-w-360 w-full justify-between px-22 h-17 bg-[#18181B] z-50">
-        <Image src={logoImg} alt="logo" width={146} height={44} />
+        <img src={"./logoH.svg"} alt="logo" width={146} height={44} />
         <div className="flex gap-3 items-center">
           {!user && (
             <>
