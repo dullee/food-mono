@@ -85,7 +85,7 @@ export default function AddFoodOverlay2({
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "testing");
+    formData.append("upload_preset", `${UPLOAD_PRESET}`);
 
     try {
       const response = await fetch(
@@ -168,7 +168,7 @@ export default function AddFoodOverlay2({
         e.preventDefault();
         e.stopPropagation();
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 text-black z-50 flex items-center justify-center p-4"
     >
       <div
         onClick={onClose}
@@ -180,19 +180,20 @@ export default function AddFoodOverlay2({
           <h3 className="text-lg font-semibold text-gray-900">
             Add new dish to {category.categoryName}
           </h3>
-          <button
+          <Button
             type="button"
+            variant={"secondary"}
             onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-slate-50 hover:text-gray-700 transition"
+            className="w-9 h-9"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="text-xs font-semibold uppercase tracking-wider ">
                 Food Name
               </label>
               <input
@@ -207,7 +208,7 @@ export default function AddFoodOverlay2({
               />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="text-xs font-semibold uppercase tracking-wider ">
                 Food Price ($)
               </label>
               <input
@@ -223,7 +224,7 @@ export default function AddFoodOverlay2({
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <label className="text-xs font-semibold uppercase tracking-wider ">
               Ingredients
             </label>
             <input
@@ -238,7 +239,7 @@ export default function AddFoodOverlay2({
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider  mb-1">
               Food Image
             </p>
 
@@ -250,7 +251,7 @@ export default function AddFoodOverlay2({
               className="hidden"
             />
 
-            {/* Clickable Card Container */}
+            {/* File upload Container */}
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -297,11 +298,11 @@ export default function AddFoodOverlay2({
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 flex justify-end">
             <Button
               type="submit"
               disabled={isSaving || uploading || !foodName.trim()}
-              className="w-full rounded-2xl py-6 font-semibold shadow-lg transition"
+              className=" rounded-xl py-4 px-2.5 font-semibold shadow-lg transition"
             >
               {isSaving ? "Saving..." : "Add Dish"}
             </Button>

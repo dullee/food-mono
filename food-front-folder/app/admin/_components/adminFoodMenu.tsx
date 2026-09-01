@@ -69,10 +69,10 @@ export default function AdminFoodMenu() {
     : categories;
 
   return (
-    <div className="rounded-[2rem] border border-gray-200 bg-white p-6 shadow-sm">
+    <div>
       <div className="flex flex-col gap-6">
         {/* Categories Header */}
-        <div className="rounded-3xl border border-gray-200 bg-slate-50 p-5">
+        <div className="rounded-3xl border border-gray-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
               Categories
@@ -96,11 +96,11 @@ export default function AdminFoodMenu() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+                  <div className="flex gap-4 flex-wrap">
                     {/* Add Dish Card Trigger */}
                     <div
                       onClick={() => setSelectedAddCategory(category)}
-                      className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center bg-slate-50 p-4 transition hover:border-black cursor-pointer min-h-55"
+                      className="group rounded-3xl border gap-2 border-dashed border-red-400 flex flex-col justify-center items-center p-4 transition hover:border-black cursor-pointer h-60 w-67.5"
                     >
                       <Button
                         variant="outline"
@@ -118,7 +118,7 @@ export default function AdminFoodMenu() {
                       getFoodsForCategory(category._id)?.map((food) => (
                         <div
                           key={food._id}
-                          className="group rounded-3xl border border-gray-200 bg-slate-50 p-4 transition hover:border-black flex flex-col justify-between"
+                          className="group rounded-3xl border border-gray-200 w-67.5 h-60 p-4 transition hover:border-black flex flex-col justify-between"
                         >
                           <div>
                             <div className="relative w-full h-32 mb-3 overflow-hidden rounded-2xl bg-gray-200">
@@ -130,9 +130,9 @@ export default function AdminFoodMenu() {
                                 alt={food.foodName}
                               />
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 onClick={() => setSelectedEditFood(food)}
-                                className="text-xs text-red-500 absolute bottom-3 right-3 h-9 w-9 p-0 bg-white/90 backdrop-blur-sm z-30 shadow-sm rounded-xl hover:bg-white"
+                                className="text-xs text-red-500 absolute bottom-5 right-5 h-11 w-11 p-0  backdrop-blur-sm z-30 shadow-sm rounded-full"
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>

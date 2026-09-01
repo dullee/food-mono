@@ -45,7 +45,7 @@ export const getColumns = (
     id: "number",
     header: "№",
     cell: ({ row }) => (
-      <span className="font-medium text-gray-500">
+      <span className="font-medium  text-[#71717A] text-[14px]">
         {(currentPage - 1) * itemsPerPage + row.index + 1}
       </span>
     ),
@@ -54,7 +54,7 @@ export const getColumns = (
     accessorKey: "user.email",
     header: "Customer",
     cell: ({ row }) => (
-      <span className="font-medium text-gray-900">
+      <span className="font-medium text-[#71717A] text-[14px] ">
         {row.original.user?.email || "Guest"}
       </span>
     ),

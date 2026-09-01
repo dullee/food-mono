@@ -70,9 +70,14 @@ export default function AdminOrderInfo() {
               disabled={selectedRowIds.size === 0 || isBatchUpdating}
               suppressHydrationWarning
               onClick={() => setIsDialogOpen(true)}
+              className={"gap-2 flex py-2 px-4"}
             >
-              Change delivery state{" "}
-              {selectedRowIds.size > 0 ? selectedRowIds.size : null}
+              Change delivery state
+              {selectedRowIds.size > 0 && (
+                <div className="bg-white rounded-2xl text-black text-xs px-2.5 py-0.5">
+                  {selectedRowIds.size}
+                </div>
+              )}
             </Button>
 
             <BatchStatusDialog

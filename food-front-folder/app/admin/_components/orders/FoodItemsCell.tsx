@@ -1,6 +1,5 @@
 "use client";
 
-import { CldImage } from "next-cloudinary";
 import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -22,11 +21,11 @@ export function FoodItemsCell({ order }: { order: Order }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="h-8 px-3 rounded-md hover:bg-gray-100 text-xs font-medium flex items-center gap-1.5 transition-colors">
+      <DropdownMenuTrigger className="h-8rounded-md text-[#71717A] text-[14px] font-medium flex items-center gap-1.5 transition-colors">
         <span>{totalCount} foods</span>
         <ChevronDown className="h-3.5 w-3.5 text-gray-500" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuContent align="start" className="w-56 rounded-md">
         {foodItems.map((item, idx) => (
           <DropdownMenuItem
             key={idx}
@@ -34,12 +33,10 @@ export function FoodItemsCell({ order }: { order: Order }) {
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-gray-100">
-                <CldImage
+                <img
                   alt={item.food?.foodName || "Food image"}
-                  fill
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                   src={item.food?.image || FALLBACK_IMAGE}
-                  sizes="36px"
                 />
               </div>
               <span className="truncate font-medium">

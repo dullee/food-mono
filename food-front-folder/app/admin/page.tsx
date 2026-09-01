@@ -58,9 +58,9 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-[#F4F4F5] justify-center w-full">
-      <div className="max-w-360 flex w-full gap-6 px-4">
-        <div className="w-65 shrink-0 hidden md:block">
-          <div className="fixed top-0 left-auto w-65 h-screen bg-white border-r border-gray-100 flex flex-col px-5 pt-9 gap-10">
+      <div className="max-w-360 flex w-full gap-6 ">
+        <div className="w-51.25 shrink-0 hidden md:block">
+          <div className="fixed top-0 left-auto w-51.25 h-screen bg-white border-r border-gray-100 flex flex-col px-5 pt-9 gap-10">
             <div className="flex max-h-12">
               <Image
                 alt="logo"
@@ -100,7 +100,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="py-6 w-full flex flex-col gap-6 min-w-0">
+        <div className="py-6 w-full flex flex-col gap-6 pr-10 min-w-0">
           <div className="flex justify-end w-full">
             {!loading && user && <ProfileButton user={user} />}
           </div>
