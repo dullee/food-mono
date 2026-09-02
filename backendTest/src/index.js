@@ -12,7 +12,7 @@ const port = Number(process.env.PORT);
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: `http://localhost:3000`, credentials: true }));
+app.use(cors({ origin: `${process.env.BASE_URL}`, credentials: true }));
 
 app.use("/category", categoryRouter);
 app.use("/food", foodRouter);
@@ -21,5 +21,5 @@ app.use("/order", orderRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => console.log("Connected"));
 app.listen(port, async () => {
-  console.log(`server is running on http://localhost:${port}`);
+  console.log(`server is running`);
 });
