@@ -18,7 +18,7 @@ const allowedOrigins = [
   process.env.BASE_URL?.replace(/\/$/, ""), // strip trailing slash if present
   "http://localhost:3000",
 ].filter(Boolean);
-
+app.set("etag", false);
 app.use(express.json());
 app.use(cookieParser());
 
