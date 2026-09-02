@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Truck } from "lucide-react";
@@ -8,7 +9,7 @@ import AdminOrderInfo from "./_components/orders/adminOrderInfo";
 import AdminFoodMenu from "./_components/adminFoodMenu";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProfileButton from "../_components/header/profileButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 interface UserProfile {
   _id: string;
@@ -17,10 +18,13 @@ interface UserProfile {
   role: string;
 }
 
-export default function Page() {
+// 1. Move the searchParams and main content logic into a child component
+function AdminContent() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  // useSearchParams is now safely encapsulated here
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "food";
 
@@ -36,7 +40,7 @@ export default function Page() {
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-            credentials: "include", // Crucial to send the cookie up
+            credentials: "include",
           },
         );
         if (!response.ok) {
@@ -44,11 +48,10 @@ export default function Page() {
           return;
         }
         const data = await response.json();
-
         setUser(data.user);
       } catch (err) {
         console.error("Auth check failed:", err);
-        setUser(null); // Clear state if token is missing or expired
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -115,5 +118,14 @@ export default function Page() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 2. Wrap the child component inside <Suspense> in the default page export
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminContent />
+    </Suspense>
   );
 }
