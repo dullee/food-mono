@@ -75,9 +75,7 @@ export default function FoodMenu() {
                       : food.category;
                   return foodCatId === category._id;
                 })
-                .map((food) => (
-                  <FoodCard key={food._id} food={food} user={user} />
-                ))}
+                .map((food) => <FoodCard key={food._id} food={food} />)}
           </div>
         </div>
       ))}
