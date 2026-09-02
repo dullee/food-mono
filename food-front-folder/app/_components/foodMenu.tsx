@@ -5,16 +5,9 @@ import { useState, useEffect } from "react";
 import { Category } from "../types/category";
 import { Food } from "../types/food";
 
-interface UserProfile {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
 export default function FoodMenu() {
   const [foods, setFoods] = useState<Food[]>([]);
-  const [user, setUser] = useState<UserProfile | null>(null);
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -22,14 +15,9 @@ export default function FoodMenu() {
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
-        const [catRes, foodRes, userRes] = await Promise.all([
+        const [catRes, foodRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/food`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include", // Crucial to send the cookie up
-          }),
         ]);
 
         if (catRes.ok && foodRes.ok) {
@@ -41,12 +29,6 @@ export default function FoodMenu() {
           setFoods(foodData.foods || foodData);
         } else {
           console.error("Failed to load category or food data.");
-        }
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData.user);
-        } else {
-          setUser(null); // Guest user
         }
       } catch (err) {
         console.error("Database connection error via backend:", err);
