@@ -31,7 +31,7 @@ export const loginUser = async (req, res) => {
     // 4. Place token inside a secure browser cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // Set to true when you deploy with HTTPS
+      secure: true, // Set to true when you deploy with HTTPS
       sameSite: "none",
       maxAge: 3600000, // 1 hour
     });
