@@ -220,7 +220,7 @@ export default function LogInForm() {
                   className="text-red-500 text-xs"
                 />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-4">
                 <div className="relative flex items-center">
                   <Field
                     name="confirmPassword"
@@ -239,7 +239,7 @@ export default function LogInForm() {
                     type="button"
                     variant={"outline"}
                     onClick={() => setShowPassword(!showPassword)}
-                    className={`w-3.5 rounded-md ${showPassword && "bg-black text-white"} text-gray-500 hover:text-gray-700`}
+                    className={`w-3.5 h-6 rounded-md ${showPassword && "bg-black text-white"} text-gray-500 hover:text-gray-700`}
                   >
                     {showPassword && <Check size={14} />}
                   </Button>
