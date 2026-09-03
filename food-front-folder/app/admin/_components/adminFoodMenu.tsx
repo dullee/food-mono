@@ -86,9 +86,9 @@ export default function AdminFoodMenu() {
 
         {/* Category Dish Lists */}
         <div className="space-y-6">
-          {!isLoading && (
-            <div className="rounded-3xl border border-gray-200 bg-white p-5 space-y-8">
-              {displayedCategories?.map((category) => (
+          <div className="rounded-3xl border border-gray-200 bg-white p-5 space-y-8">
+            {!isLoading ? (
+              displayedCategories?.map((category) => (
                 <div key={category._id}>
                   <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="font-semibold text-gray-800 text-lg">
@@ -154,9 +154,11 @@ export default function AdminFoodMenu() {
                       ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <p className="text-gray-400">Loading Menu</p>
+            )}
+          </div>
 
           {/* Add Food Modal Component */}
           {selectedAddCategory && (

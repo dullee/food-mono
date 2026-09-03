@@ -204,7 +204,7 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
 
           {/* Main Content Box */}
           <div className="font-bold text-xl h-full flex flex-col justify-between gap-5 text-[#71717A] overflow-hidden">
-            {!loading && activeCartButton === "cart" && (
+            {activeCartButton === "cart" && (
               <>
                 {/* Scrollable Cart Items Container */}
                 <div className="flex-1 p-4 bg-white rounded-2xl overflow-y-auto pr-1 flex flex-col gap-5">
@@ -224,100 +224,102 @@ export default function CartOverlay({ onClose, userObj }: CartOverlayProps) {
                       </p>
                     </div>
                   ) : (
-                    <>
-                      {cartItems.map(
-                        (item: any, index: number, array: any[]) => (
-                          <div
-                            key={item.food._id}
-                            className="flex flex-col gap-5"
-                          >
-                            <div className="flex gap-2.5">
-                              <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
-                                <Image
-                                  src={item.food.image || "/finger-food.jpg"}
-                                  alt={item.food.foodName}
-                                  className="object-cover"
-                                  fill
-                                />
-                              </div>
-                              <div className="flex flex-col justify-between max-w-76.25 w-full">
-                                <div className="flex justify-between w-full">
-                                  <div className="flex flex-col">
-                                    <h1 className="text-base text-[#EF4444]">
-                                      {item.food.foodName}
-                                    </h1>
-                                    <p className="text-xs font-normal text-black line-clamp-2">
-                                      {item.food.ingredients}
+                    !loading && (
+                      <>
+                        {cartItems.map(
+                          (item: any, index: number, array: any[]) => (
+                            <div
+                              key={item.food._id}
+                              className="flex flex-col gap-5"
+                            >
+                              <div className="flex gap-2.5">
+                                <div className="w-31 h-30 shrink-0 relative rounded-xl overflow-hidden">
+                                  <Image
+                                    src={item.food.image || "/finger-food.jpg"}
+                                    alt={item.food.foodName}
+                                    className="object-cover"
+                                    fill
+                                  />
+                                </div>
+                                <div className="flex flex-col justify-between max-w-76.25 w-full">
+                                  <div className="flex justify-between w-full">
+                                    <div className="flex flex-col">
+                                      <h1 className="text-base text-[#EF4444]">
+                                        {item.food.foodName}
+                                      </h1>
+                                      <p className="text-xs font-normal text-black line-clamp-2">
+                                        {item.food.ingredients}
+                                      </p>
+                                    </div>
+
+                                    <Button
+                                      variant="outline"
+                                      onClick={() =>
+                                        removeCartItem(item.food._id)
+                                      }
+                                      className="border border-red-500 text-red-500 w-9 h-9 p-0"
+                                    >
+                                      <X size={16} />
+                                    </Button>
+                                  </div>
+
+                                  <div className="flex justify-between text-black">
+                                    <div className="flex gap-3 items-center">
+                                      <Button
+                                        onClick={() =>
+                                          handleQuantityChange(
+                                            item.food._id,
+                                            item.quantity - 1,
+                                          )
+                                        }
+                                        variant="ghost"
+                                        className="p-2.5 h-auto"
+                                      >
+                                        <Minus size={16} />
+                                      </Button>
+                                      <p className="text-sm">{item.quantity}</p>
+                                      <Button
+                                        onClick={() =>
+                                          handleQuantityChange(
+                                            item.food._id,
+                                            item.quantity + 1,
+                                          )
+                                        }
+                                        variant="ghost"
+                                        className="p-2.5 h-auto"
+                                      >
+                                        <Plus size={16} />
+                                      </Button>
+                                    </div>
+                                    <p className="text-base font-bold">
+                                      ${item.food.price}
                                     </p>
                                   </div>
-
-                                  <Button
-                                    variant="outline"
-                                    onClick={() =>
-                                      removeCartItem(item.food._id)
-                                    }
-                                    className="border border-red-500 text-red-500 w-9 h-9 p-0"
-                                  >
-                                    <X size={16} />
-                                  </Button>
-                                </div>
-
-                                <div className="flex justify-between text-black">
-                                  <div className="flex gap-3 items-center">
-                                    <Button
-                                      onClick={() =>
-                                        handleQuantityChange(
-                                          item.food._id,
-                                          item.quantity - 1,
-                                        )
-                                      }
-                                      variant="ghost"
-                                      className="p-2.5 h-auto"
-                                    >
-                                      <Minus size={16} />
-                                    </Button>
-                                    <p className="text-sm">{item.quantity}</p>
-                                    <Button
-                                      onClick={() =>
-                                        handleQuantityChange(
-                                          item.food._id,
-                                          item.quantity + 1,
-                                        )
-                                      }
-                                      variant="ghost"
-                                      className="p-2.5 h-auto"
-                                    >
-                                      <Plus size={16} />
-                                    </Button>
-                                  </div>
-                                  <p className="text-base font-bold">
-                                    ${item.food.price}
-                                  </p>
                                 </div>
                               </div>
+                              {index !== array.length - 1 && (
+                                <div className="border-b-2 border-dashed border-gray-400" />
+                              )}
                             </div>
-                            {index !== array.length - 1 && (
-                              <div className="border-b-2 border-dashed border-gray-400" />
-                            )}
-                          </div>
-                        ),
-                      )}
-                      <div className="flex flex-col gap-2 pt-2 text-[#71717A]">
-                        <h1 className="text-sm font-semibold">
-                          Delivery location
-                        </h1>
-                        <textarea
-                          placeholder="Please share your complete address"
-                          className="border border-gray-300 rounded-lg h-20 p-2 text-sm font-normal outline-none focus:border-red-500"
-                          value={deliveryAddress}
-                          onChange={(e) => updateAdress(e.target.value)}
-                        />
-                      </div>
-                    </>
+                          ),
+                        )}
+                        <div className="flex flex-col gap-2 pt-2 text-[#71717A]">
+                          <h1 className="text-sm font-semibold">
+                            Delivery location
+                          </h1>
+                          <textarea
+                            placeholder="Please share your complete address"
+                            className="border border-gray-300 rounded-lg h-20 p-2 text-sm font-normal outline-none focus:border-red-500"
+                            value={deliveryAddress}
+                            onChange={(e) => updateAdress(e.target.value)}
+                          />
+                        </div>
+                      </>
+                    )
                   )}
                 </div>
 
-                {cartItems.length > 0 && (
+                {!loading && cartItems.length > 0 && (
                   <div className="pt-4 p-4 gap-4 bg-white rounded-2xl flex-col flex mt-auto shrink-0 text-sm font-normal text-black">
                     <h1 className="font-bold text-xl text-[#71717A]">
                       Payment info
