@@ -18,7 +18,7 @@ export const changePassword = async (req, res) => {
         .status(404)
         .json({ message: "Email is not linked to an account" });
     // Send back true or false
-    return res.status(200).json({ existingUser });
+    return res.status(200).json("Succesfully changed password");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -59,10 +59,21 @@ export default function Header() {
           {!user && (
             <>
               <Link href={"/sign_up"}>
-                <Button className={"bg-white text-black"}>Sign up</Button>
+                <Button
+                  className={
+                    "bg-white text-black hover:bg-black hover:text-white"
+                  }
+                >
+                  Sign up
+                </Button>
               </Link>
               <Link href={"/log_in"}>
-                <Button className={"bg-[#EF4444]"}>Log in</Button>
+                <Button
+                  variant={"outline"}
+                  className={"bg-[#EF4444] text-white border-none  "}
+                >
+                  Log in
+                </Button>
               </Link>
             </>
           )}
