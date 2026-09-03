@@ -28,7 +28,7 @@ export default function ProfileButton({ user }: ProfileProps) {
       console.error("Logout failed:", error);
     } finally {
       // Hard refresh and navigate to home page
-      // window.location.href = "/";
+      window.location.href = "/";
     }
   };
   return (
