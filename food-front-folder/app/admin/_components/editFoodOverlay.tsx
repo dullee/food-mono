@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { X, Trash } from "lucide-react";
-import { CldImage, CldUploadButton } from "next-cloudinary";
+import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { Food } from "@/app/types/food";
 import { Category } from "@/app/types/category.js";
@@ -134,7 +134,7 @@ export default function EditFoodOverlay({
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "testing");
+    formData.append("upload_preset", `${UPLOAD_PRESET}`);
 
     try {
       const response = await fetch(
@@ -211,26 +211,24 @@ export default function EditFoodOverlay({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-950/20 transition-opacity"
       />
-      <div className="relative z-10 w-118 transform rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl transition-all">
+      <div className="relative z-10 w-118 transform rounded-md border border-gray-100 bg-white p-6 shadow-xl transition-all">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Edit {food.foodName}
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900">Dishes info</h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-slate-50 hover:text-gray-700 transition"
+            className="rounded-full p-1.5 text-[#71717A] hover:bg-slate-50 hover:text-gray-700 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleEditChanges} className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <form onSubmit={handleEditChanges} className="flex flex-col gap-3">
+          <div>
+            <div className="flex justify-between py-3">
+              <label className="text-xs  uppercase tracking-wider text-[#71717A]">
                 Dish Name
               </label>
               <input
@@ -238,13 +236,13 @@ export default function EditFoodOverlay({
                 value={foodName}
                 onChange={(e) => setFoodName(e.target.value)}
                 disabled={isSaving}
-                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                className="w-[288px] rounded-md border px-3 py-2 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
                 required
               />
             </div>
 
-            <div className="flex justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <div className="flex justify-between py-3">
+              <label className="text-xs  uppercase tracking-wider text-[#71717A]">
                 Dish Category
               </label>
               <Select
@@ -253,7 +251,7 @@ export default function EditFoodOverlay({
                 disabled={isSaving}
                 required
               >
-                <SelectTrigger className="w-full focus:ring-4 ring-1 ring-gray-500/9  focus:ring-gray-500/5 rounded-2xl border px-4 py-3 text-sm text-gray-900 bg-white">
+                <SelectTrigger className="w-[288px] focus:ring-4 ring-1 ring-gray-500/9  focus:ring-gray-500/5 rounded-md border px-4 py-3 text-sm text-gray-900 bg-white">
                   <SelectValue placeholder="Select a category">
                     {
                       categories.find(
@@ -262,18 +260,24 @@ export default function EditFoodOverlay({
                     }
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  align="start"
+                  alignItemWithTrigger={false}
+                  className={"rounded-md max-w-20 "}
+                >
                   {categories.map((cat) => (
-                    <SelectItem key={cat._id} value={cat._id}>
-                      {cat.categoryName}
+                    <SelectItem key={cat._id} value={cat._id} className={"p-2"}>
+                      <p className=" bg-[#F4F4F5] py-0.5 pl-2.5 w-29 rounded-2xl">
+                        {cat.categoryName}
+                      </p>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <div className="flex justify-between py-3">
+              <label className="text-xs  uppercase tracking-wider text-[#71717A]">
                 Ingredients
               </label>
               <input
@@ -281,13 +285,13 @@ export default function EditFoodOverlay({
                 value={foodIngredients}
                 onChange={(e) => setFoodIngredients(e.target.value)}
                 disabled={isSaving}
-                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                className=" rounded-md w-[288px] border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
                 required
               />
             </div>
 
-            <div className="flex justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <div className="flex justify-between py-3">
+              <label className="text-xs  uppercase tracking-wider text-[#71717A]">
                 Food Price ($)
               </label>
               <input
@@ -295,80 +299,82 @@ export default function EditFoodOverlay({
                 value={foodPrice}
                 onChange={(e) => setFoodPrice(Number(e.target.value))}
                 disabled={isSaving}
-                className="w-full rounded-2xl border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
+                className=" rounded-md w-[288px] border px-4 py-3 text-sm text-gray-900 outline-none transition focus:ring-4 focus:ring-gray-500/5 disabled:opacity-50"
                 required
               />
             </div>
-          </div>
-          <div className="flex justify-between">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleLogoUpload}
-              accept="image/*"
-              className="hidden"
-            />{" "}
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
-              Image
-            </p>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDragDrop}
-              onClick={triggerFileSelect}
-              className={`relative w-[288px] h-29 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition ${
-                dragOverUpload
-                  ? "border-blue-500 bg-blue-50/50 scale-[0.98]"
-                  : "border-gray-300 bg-blue-600/5 hover:border-gray-400 hover:bg-gray-50"
-              }`}
-            >
-              <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
-                {uploading ? (
-                  <span className="text-xs text-gray-500 animate-pulse">
-                    Uploading file to cloud...
-                  </span>
-                ) : foodImage ? (
-                  <div className="relative w-full h-full">
-                    <CldImage
-                      className="object-cover"
-                      src={foodImage}
-                      alt="Uploaded food"
-                      sizes="w-100 h-30"
-                      fill
-                    />
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation(); // prevents event from traveling down
-                        setFoodImage("");
-                      }}
-                      variant={"outline"}
-                      className="absolute top-2 right-2 rounded-full p-2 bg-white w-9 h-9"
-                    >
-                      <X size={16} />
-                    </Button>
-                  </div>
-                ) : (
-                  <span className="text-xs">
-                    {dragOverUpload ? "Drop here!" : "Click or drag image file"}
-                  </span>
-                )}
+            <div className="flex justify-between py-3">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleLogoUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <p className="text-xs  uppercase tracking-wider text-[#71717A]">
+                Image
+              </p>
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDragDrop}
+                onClick={triggerFileSelect}
+                className={`relative w-[288px] h-29 overflow-hidden border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition ${
+                  dragOverUpload
+                    ? "border-blue-500 bg-blue-50/50 scale-[0.98]"
+                    : "border-gray-300 bg-blue-600/5 hover:border-gray-400 hover:bg-gray-50"
+                }`}
+              >
+                <div className="relative w-full h-36 overflow-hidden border border-dashed rounded-xl flex items-center justify-center cursor-pointer">
+                  {uploading ? (
+                    <span className="text-xs text-gray-500 animate-pulse">
+                      Uploading file to cloud...
+                    </span>
+                  ) : foodImage ? (
+                    <div className="relative w-full h-full">
+                      <CldImage
+                        className="object-cover"
+                        src={foodImage}
+                        alt="Uploaded food"
+                        sizes="w-100 h-30"
+                        fill
+                      />
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevents event from traveling down
+                          setFoodImage("");
+                        }}
+                        variant={"outline"}
+                        className="absolute top-2 right-2 rounded-full p-2 bg-white w-9 h-9"
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs">
+                      {dragOverUpload
+                        ? "Drop here!"
+                        : "Click or drag image file"}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 pt-2">
+          <div className="flex items-center justify-between gap-2 pt-6">
             <Button
               type="button"
               onClick={handleDelete}
               disabled={isSaving}
-              className="rounded-xl bg-white hover:bg-red-50 border border-red-500 px-4 py-2 text-red-500 transition disabled:opacity-50"
+              className="rounded-md bg-white hover:bg-red-50 border border-red-500 px-4 py-3 text-red-500 transition disabled:opacity-50"
             >
-              <Trash className="h-4 w-4" />
+              <Trash className="h-4 w-4" size={16} />
             </Button>
             <Button
               type="submit"
               disabled={isSaving || !foodName.trim()}
-              className="rounded-xl bg-red-500 hover:bg-red-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition disabled:opacity-50"
+              className="rounded-md px-4 py-2.5 text-sm font-medium text-white shadow-sm transition disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save changes"}
             </Button>
